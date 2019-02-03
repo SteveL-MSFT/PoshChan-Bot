@@ -24,19 +24,24 @@ if ($body.action -eq "created") {
         $commentBody = $body.comment.body
         if ($commentBody.StartsWith($poshchanMention)) {
             $command = $commentBody.SubString($poshchanMention.Length)
-            $output = @(
-                "Authorized User: $user"
-                "Command: $command"
-                "PR: $($body.issue.pull_request.url)"
-            )
-            $output = [string]::Join("`n", $output)
-            $output | Write-Host
-            $output = [HttpUtility]::JavaScriptStringEncode($output)
+            $pr = $body.issue.pull_request.url
+            if ($null -ne $pr) {
+                $output = @(
+                    "Authorized User: $user"
+                    "Command: $command"
+                    "PR: $($body.issue.pull_request.url)"
+                )
+                $output = [string]::Join("`n", $output)
+                $output | Write-Host
+                $output = [HttpUtility]::JavaScriptStringEncode($output)
 
-            try {
-                Invoke-RestMethod -Headers @{Authorization = "token $($env:GITHUB_API_KEY)"} $body.issue.comments_url -Method Post -Body "{ ""body"": ""$output"" }"
-            } catch {
-                $_ | Out-String | Write-Host
+                try {
+                    Invoke-RestMethod -Headers @{Authorization = "token $($env:GITHUB_API_KEY)"} $body.issue.comments_url -Method Post -Body "{ ""body"": ""$output"" }"
+                } catch {
+                    $_ | Out-String | Write-Host
+                }
+            } else {
+                Write-Host "Ignoring non-PR comment"
             }
         } else {
             Write-Host "Ignoring comment not directed @PoshChan"
