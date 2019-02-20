@@ -36,7 +36,7 @@ if ($body.action -eq "created") {
                 $output = [HttpUtility]::JavaScriptStringEncode($output)
 
                 try {
-                    Invoke-RestMethod -Headers @{Authorization = "token $($env:GITHUB_API_KEY)"} $body.issue.comments_url -Method Post -Body "{ ""body"": ""$output"" }"
+                    Invoke-RestMethod -Headers @{Authorization = "token $($env:GITHUB_PERSONAL_ACCESS_TOKEN)"} $body.issue.comments_url -Method Post -Body "{ ""body"": ""$output"" }"
                 } catch {
                     $_ | Out-String | Write-Host
                 }
