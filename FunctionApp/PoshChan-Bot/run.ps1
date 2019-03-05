@@ -31,14 +31,14 @@ if ($body.action -ne "created") {
 }
 
 $user = $body.comment.user.login
-if (!Test-User $user) {
+if (!(Test-User $user)) {
     Write-Warning "Unauthorized User: $user"
     Send-Ok
     return
 }
 
 $commentBody = $body.comment.body
-if (!$commentBody.StartsWith($poshchanMention)) {
+if (!($commentBody.StartsWith($poshchanMention))) {
     Write-Warning "Ignoring comment not directed @PoshChan"
     Send-Ok
     return
@@ -61,6 +61,7 @@ switch -regex ($command.TrimEnd()) {
             commentsUrl = $body.issue.comments_url
         }
 
+        Write-Host "Queuing rebuild for $($queueItem.context)"
         Push-OutputBinding -Name azdevopsrebuild -Value $queueItem
         break
     }
