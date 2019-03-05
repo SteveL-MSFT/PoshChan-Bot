@@ -1,0 +1,19 @@
+{
+  "disabled": false,
+  "bindings": [
+    {
+      "name": "QueueItem",
+      "type": "queueTrigger",
+      "direction": "in",
+      "queueName": "ps-queue-items",
+      "connection": ""
+    },
+    {
+      "type": "queue",
+      "direction": "out",
+      "name": "github-respond",
+      "queueName": "github-respond",
+      "connection": ""
+    }
+  ]
+}
