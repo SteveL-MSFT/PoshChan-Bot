@@ -61,13 +61,13 @@ switch -regex ($command.TrimEnd()) {
             commentsUrl = $body.issue.comments_url
         }
 
-        Push-OutputBinding -Name azdevops-rebuild -Value $queueItem
+        Push-OutputBinding -Name azdevopsrebuild -Value $queueItem
         break
     }
 
     default {
         $message = "I do not understand the command: $command"
-        Push-OutputBinding -Name github-respond -Value @{ url = $body.issue.comments_url; message = $message }
+        Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
         break
     }
 }

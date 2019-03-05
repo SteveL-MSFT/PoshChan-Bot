@@ -11,7 +11,7 @@
     {
       "type": "queue",
       "direction": "out",
-      "name": "github-respond",
+      "name": "githubrespond",
       "queueName": "github-respond",
       "connection": ""
     }

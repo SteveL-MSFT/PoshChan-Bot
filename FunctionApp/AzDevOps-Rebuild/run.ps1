@@ -19,7 +19,7 @@ Allowed contexts:
 $contexts
 "@
     Write-Error $message
-    Push-OutputBinding -Name github-respond -Value @{ url = $item.commentsUrl; message = $message }
+    Push-OutputBinding -Name githubrespond -Value @{ url = $item.commentsUrl; message = $message }
     return
 }
 
