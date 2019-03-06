@@ -25,7 +25,12 @@ $poshchanMention = "@PoshChan "
 
 # Don't act on edited comments
 if ($body.action -ne "created") {
-    Write-Warning "Ignoring action $($body.action)"
+    Send-Ok
+    return
+}
+
+$commentBody = $body.comment.body
+if (!($commentBody.StartsWith($poshchanMention))) {
     Send-Ok
     return
 }
@@ -33,13 +38,6 @@ if ($body.action -ne "created") {
 $user = $body.comment.user.login
 if (!(Test-User $user)) {
     Write-Warning "Unauthorized User: $user"
-    Send-Ok
-    return
-}
-
-$commentBody = $body.comment.body
-if (!($commentBody.StartsWith($poshchanMention))) {
-    Write-Warning "Ignoring comment not directed @PoshChan"
     Send-Ok
     return
 }
@@ -59,15 +57,16 @@ switch -regex ($command.TrimEnd()) {
             context = $matches.context
             pr = $pr
             commentsUrl = $body.issue.comments_url
+            user = $user
         }
 
-        Write-Host "Queuing rebuild for $($queueItem.context)"
+        Write-Host "Queuing rebuild for '$($queueItem.context)'"
         Push-OutputBinding -Name azdevopsrebuild -Value $queueItem
         break
     }
 
     default {
-        $message = "I do not understand the command: $command"
+        $message = "@$user, I do not understand: $command"
         Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
         break
     }
