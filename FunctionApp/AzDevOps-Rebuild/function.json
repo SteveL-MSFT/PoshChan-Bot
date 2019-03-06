@@ -5,13 +5,13 @@
       "name": "QueueItem",
       "type": "queueTrigger",
       "direction": "in",
-      "queueName": "ps-queue-items",
+      "queueName": "azdevops-rebuild",
       "connection": ""
     },
     {
       "type": "queue",
       "direction": "out",
-      "name": "github-respond",
+      "name": "githubrespond",
       "queueName": "github-respond",
       "connection": ""
     }

@@ -19,14 +19,14 @@
     {
       "type": "queue",
       "direction": "out",
-      "name": "azdevops-rebuild",
+      "name": "azdevopsrebuild",
       "queueName": "azdevops-rebuild",
       "connection": ""
     },
     {
       "type": "queue",
       "direction": "out",
-      "name": "github-respond",
+      "name": "githubrespond",
       "queueName": "github-respond",
       "connection": ""
     }

@@ -5,24 +5,26 @@ $item = $QueueItem | ConvertFrom-Json
 $url = $item.url
 $message = $item.message
 
-if ($null -eq $body) {
-    Write-Error "Body is missing"
+if ($null -eq $message) {
+    Write-Error "Message is missing"
     return
 }
 
-$message
-$message = [HttpUtility]::JavaScriptStringEncode($message)
+Write-Host "Posting message:`n$message"
+Write-Host "To URL: $url"
 
-$output = @{
+$message = [System.Web.HttpUtility]::JavaScriptStringEncode($message)
+
+$json = @{
     body = $message
 } | ConvertTo-Json -Compress
 
 try {
     $headers = @{
-        Authorization = "token $($env:GITHUB_API_KEY)"
+        Authorization = "token $($env:GITHUB_PERSONAL_ACCESS_TOKEN)"
     }
 
-    Invoke-RestMethod -Headers $headers -Url $url -Method Post -Body $output
+    Invoke-RestMethod -Headers $headers -Uri $url -Method Post -Body $json
 } catch {
     $_ | Out-String | Write-Error
 }
