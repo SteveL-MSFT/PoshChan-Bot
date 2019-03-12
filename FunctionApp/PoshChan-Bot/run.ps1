@@ -11,6 +11,11 @@ Write-Host "PoshChan-Bot received a request"
 function Test-User([string] $user) {
     return $user -in @(
         "SteveL-MSFT"
+        "TravisEz13"
+        "anmenaga"
+        "daxian-dbw"
+        "adityapatwardhan"
+        "iSazonov"
     )
 }
 
@@ -62,7 +67,7 @@ switch -regex ($command.TrimEnd()) {
             "static-analysis" = "PowerShell-CI-static-analysis"
         }
 
-        $invalid = $target | Where-Object { $supportedTargets -notcontains $_ }
+        $invalid = $target | Where-Object { $supportedTargets.Keys -notcontains $_ }
         if ($invalid) {
             $supported = [string]::Join(",", ($supportedTargets | ForEach-Object { "``$_``" }))
             $message = "@$user, I do not understand the build target(s) '$([string]::Join(",",$invalid))'; I only allow $supported"
@@ -72,36 +77,36 @@ switch -regex ($command.TrimEnd()) {
 
         foreach ($target in $targets) {
             $queueItem = @{
-                context = $target
+                context = $supportedTargets.$target
                 pr = $pr
                 commentsUrl = $body.issue.comments_url
                 user = $user
             }
 
             Write-Host "Queuing rebuild for '$($queueItem.context)'"
-            Push-OutputBinding -Name azdevopsrebuild -Value $queueItem
+            Push-Queue -Queue azdevops-rebuild -Object $queueItem
         }
 
         break
     }
 
     "Please remind me in (?<time>\d+) (?<units>.+)" {
-        $time = $matches.time
+        [int]$time = $matches.time
         $units = $matches.units
 
         switch -regex ($units.ToLower()) {
             "minute(s?)" {
-                $time = $time * 60
+                $timeSeconds = $time * 60
                 break
             }
 
             "hour(s?)" {
-                $time = $time * 60 * 60
+                $timeSeconds = $time * 60 * 60
                 break
             }
 
             "day(s?)" {
-                $time = $time * 60 * 60 * 24
+                $timeSeconds = $time * 60 * 60 * 24
                 break
             }
 
@@ -112,8 +117,11 @@ switch -regex ($command.TrimEnd()) {
             }
         }
 
-        $message = "@$user, this is the reminder you requested"
-        Push-Queue -Queue githubrespond -Object @{ url = $body.issue.comments_url; message = $message } -VisibilitySeconds $time
+        $message = "@$user, will remind you in $time $units"
+        Push-Queue -Queue github-respond -Object @{ url = $body.issue.comments_url; message = $message }
+
+        $message = "@$user, this is the reminder you requested $time $units ago"
+        Push-Queue -Queue github-respond -Object @{ url = $body.issue.comments_url; message = $message } -VisibilitySeconds $timeSeconds
     }
 
     default {
