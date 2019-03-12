@@ -52,17 +52,68 @@ if ($null -eq $pr) {
 $command = $commentBody.SubString($poshchanMention.Length)
 
 switch -regex ($command.TrimEnd()) {
-    "Please rebuild (?<context>.*)" {
-        $queueItem = @{
-            context = $matches.context
-            pr = $pr
-            commentsUrl = $body.issue.comments_url
-            user = $user
+    "Please rebuild (?<target>.+)" {
+
+        $targets = $matches.target.Split(",")
+        $supportedTargets = @{
+            linux = "PowerShell-CI-linux"
+            windows = "PowerShell-CI-windows"
+            macos = "PowerShell-CI-macos"
+            "static-analysis" = "PowerShell-CI-static-analysis"
         }
 
-        Write-Host "Queuing rebuild for '$($queueItem.context)'"
-        Push-OutputBinding -Name azdevopsrebuild -Value $queueItem
+        $invalid = $target | Where-Object { $supportedTargets -notcontains $_ }
+        if ($invalid) {
+            $supported = [string]::Join(",", ($supportedTargets | ForEach-Object { "``$_``" }))
+            $message = "@$user, I do not understand the build target(s) '$([string]::Join(",",$invalid))'; I only allow $supported"
+            Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+            break
+        }
+
+        foreach ($target in $targets) {
+            $queueItem = @{
+                context = $target
+                pr = $pr
+                commentsUrl = $body.issue.comments_url
+                user = $user
+            }
+
+            Write-Host "Queuing rebuild for '$($queueItem.context)'"
+            Push-OutputBinding -Name azdevopsrebuild -Value $queueItem
+        }
+
         break
+    }
+
+    "Please remind me in (?<time>\d+) (?<units>.+)" {
+        $time = $matches.time
+        $units = $matches.units
+
+        switch -regex ($units.ToLower()) {
+            "minute(s?)" {
+                $time = $time * 60
+                break
+            }
+
+            "hour(s?)" {
+                $time = $time * 60 * 60
+                break
+            }
+
+            "day(s?)" {
+                $time = $time * 60 * 60 * 24
+                break
+            }
+
+            default {
+                $message = "@$user, I do not understand '$units'; I only allow ``minutes``,``hours``, and ``days``"
+                Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+                break
+            }
+        }
+
+        $message = "@$user, this is the reminder you requested"
+        Push-Queue -Queue githubrespond -Object @{ url = $body.issue.comments_url; message = $message } -VisibilitySeconds $time
     }
 
     default {
