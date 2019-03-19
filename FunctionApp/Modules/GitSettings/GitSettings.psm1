@@ -1,10 +1,10 @@
 # This cmdlet reads the ./.poshchan/settings.json file and parses it to a hashtable
 
 # $PR is the URL to the Pull Request, currently only understands GitHub json
-function Get-Config($organization, $project) {
+function Get-Settings($organization, $project) {
     $params = @{
-        $uri = "https://api.github.com/repos/$organization/$project/contents/.poshchan/settings.json"
-        $headers = @{
+        Uri = "https://api.github.com/repos/$organization/$project/contents/.poshchan/settings.json"
+        Headers = @{
             Authorization = "token $($env:GITHUB_PERSONAL_ACCESS_TOKEN)"
         }
     }

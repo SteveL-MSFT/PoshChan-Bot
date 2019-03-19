@@ -7,15 +7,18 @@ param($Request, $TriggerMetadata)
 # Write to the Azure Functions log stream.
 Write-Host "PoshChan-Bot received a request"
 
-# Change to get list of authorized users from specific repo
+$staging = $false
+
+function Write-Trace($message) {
+    if ($staging) {
+        Write-Host $message
+    }
+}
+
 function Test-User([string] $user) {
+    Write-Trace "Checking user '$user'"
     return $user -in @(
-        "SteveL-MSFT"
-        "TravisEz13"
-        "anmenaga"
-        "daxian-dbw"
-        "adityapatwardhan"
-        "iSazonov"
+        $settings.authorized_users
     )
 }
 
@@ -27,18 +30,35 @@ function Send-Ok {
 
 $body = $Request.Body
 $poshchanMention = "@PoshChan "
+$poshchanStagingMention = "@PoshChan-Staging "
+
+$commentBody = $body.comment.body
+if (!($commentBody.StartsWith($poshchanMention)) -and !($commentBody.StartsWith($poshchanStagingMention))) {
+    Write-Trace "Skipping message not sent to @PoshChan"
+    Send-Ok
+    return
+}
+elseif ($commentBody.StartsWith($poshchanStagingMention)) {
+    $staging = $true
+}
 
 # Don't act on edited comments
 if ($body.action -ne "created") {
+    Write-Trace "Skipping message with action '$($body.action)'"
     Send-Ok
     return
 }
 
-$commentBody = $body.comment.body
-if (!($commentBody.StartsWith($poshchanMention))) {
+$organization = $body.repository.owner.login
+$project = $body.repository.name
+if ($null -eq $organization -or $null -eq $project) {
+    Write-Error "Organization or Project was null"
     Send-Ok
     return
 }
+
+Write-Trace "Reading settings"
+$settings = Get-Settings -organization $organization -project $project
 
 $user = $body.comment.user.login
 if (!(Test-User $user)) {
@@ -54,51 +74,45 @@ if ($null -eq $pr) {
     return
 }
 
-$organization = $body.repository.owner.login
-$project = $body.repository.name
-
-Get-Config -organization $organization -project $project
-
 $command = $commentBody.SubString($poshchanMention.Length)
 
 switch -regex ($command.TrimEnd()) {
     "Please rebuild (?<target>.+)" {
 
-        $targets = $matches.target.Split(",")
+        $targets = $matches.target.Split(",").Trim()
 
-        $invalid = $target | Where-Object { $global:PoshChan_Settings.build_targets.Keys -notcontains $_ }
+        $invalid = $targets | Where-Object { $settings.build_targets.Keys -notcontains $_ }
         if ($invalid) {
-            $supported = [string]::Join(",", ($global:PoshChan_Settings.build_targets.Keys | ForEach-Object { "``$_``" }))
-            $message = "@$user, I do not understand the build target(s) '$([string]::Join(",",$invalid))'; I only allow $supported"
+            $supported = [string]::Join(", ", ($settings.build_targets.Keys | ForEach-Object { "``$_``" }))
+            $message = "@$user, I do not understand the build target(s) ``$([string]::Join(", ",$invalid))``; I only allow $supported"
             Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
             break
         }
 
         $resolvedTargets = [System.Collections.ArrayList]::new()
         foreach ($target in $targets) {
-            if ($target.Count -gt 1) {
-                foreach ($subTarget in $target) {
-                    $null = $resolvedTargets.Add($subTarget)
+            $context = $settings.build_targets.$target
+            if ($context.Count -gt 1) {
+                foreach ($subTarget in $context) {
+                    $resolvedTargets += $subTarget
                 }
             }
             else {
-                $null = $resolvedTargets.Add($target)
+                $resolvedTargets += $context
             }
         }
 
-        foreach ($target in ($resolvedTargets | Select-Object -Unique)) {
-            $queueItem = @{
-                context = $global:PoshChan_Settings.build_targets.$target
-                pr = $pr
-                commentsUrl = $body.issue.comments_url
-                user = $user
-                organization = $organization
-                project= $project
-            }
-
-            Write-Host "Queuing rebuild for '$($queueItem.context)'"
-            Push-Queue -Queue azdevops-rebuild -Object $queueItem
+        $queueItem = @{
+            context = ($resolvedTargets | Select-Object -Unique)
+            pr = $pr
+            commentsUrl = $body.issue.comments_url
+            user = $user
+            organization = $organization
+            project = $project
         }
+
+        Write-Host "Queuing rebuild for '$([string]::Join(", ",$queueItem.context))'"
+        Push-Queue -Queue azdevops-rebuild -Object $queueItem
 
         break
     }
