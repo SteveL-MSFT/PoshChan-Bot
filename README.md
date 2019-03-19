@@ -10,6 +10,7 @@ Recommendation is to only allow maintainers and key contributors.
 * `Please rebuild <target>`
 
   `<target>` can be `windows`,`linux`,`macos`,`static-analysis` or a comma separated list of any combination.
+  You can also specify `all` if you want everything rebuilt.
   This will initiate a rebuild of the current PullRequest for the specified target(s).
 
 * `Please remind me in <time> <units>`
@@ -20,7 +21,7 @@ Recommendation is to only allow maintainers and key contributors.
 
 ## Deploying
 
-This Bot is written as an Azure FunctionApp.
+This Bot is written in PowerShell as an Azure FunctionApp (requires Azure Functions v2).
 To deploy this, create your own Azure FunctionApp and publish the code in the `FunctionApp` folder to your Azure FunctionApp.
 
 The Bot relies on a GitHub account to be able to post back comments to a Pull Request or Issue.  Create a custom GitHub
@@ -43,7 +44,12 @@ The format for this file should be:
   "build_targets": {
     "linux": "Project_CI_Linux",
     "macos": "Project_CI_macOS",
-    "windows": "Project_CI_windows"
+    "windows": "Project_CI_windows",
+    "all": [
+      "Project_CI_Linux",
+      "Project_CI_macOS",
+      "Project_CI_windows"
+    ]
   },
   "authorized_users": [
     "GitHub_User1",
