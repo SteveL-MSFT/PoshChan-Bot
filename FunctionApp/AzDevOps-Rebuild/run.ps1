@@ -28,18 +28,6 @@ if ($statuses.Count -eq 0) {
     return
 }
 
-try {
-    $url = "https://dev.azure.com/$($item.organization)/$($item.project)/_apis/build/builds/$($buildId)?api-version=5.0"
-    Write-Host "Getting build from: $url"
-    $build = Invoke-RestMethod -Uri $url -Authentication Basic -Credential $cred
-}
-catch {
-    $_ | Out-String | Write-Error
-    $message = "@$($item.user), could not find build at: $url"
-    Push-GitHubComment -message $message
-    return
-}
-
 foreach ($context in $item.context) {
     $status = $statuses | Where-Object { $_.context -eq $context } | Sort-Object id -Descending | Select-Object -First 1
 
@@ -62,13 +50,25 @@ foreach ($context in $item.context) {
         return
     }
 
+    try {
+        $url = "https://dev.azure.com/$($item.organization)/$($item.project)/_apis/build/builds/$($buildId)?api-version=5.0"
+        Write-Host "Getting build from: $url"
+        $build = Invoke-RestMethod -Uri $url -Authentication Basic -Credential $cred
+    }
+    catch {
+        $_ | Out-String | Write-Error
+        $message = "@$($item.user), could not find build at: $url"
+        Push-GitHubComment -message $message
+        return
+    }
+
     $params = @{
         Uri = "https://dev.azure.com/$($item.organization)/$($item.project)/_apis/build/builds?api-version=5.0"
         Method = "Post"
         Authentication = "Basic"
         Credential = $cred
         Body = @{
-            buildNumberRevision = $build.buildNumberRevision++
+            buildNumberRevision = [int]($build.buildNumberRevision) + 1
             id = $build.id
             definition = $build.definition
             sourceVersion = $build.sourceVersion
@@ -80,13 +80,16 @@ foreach ($context in $item.context) {
         ContentType = "application/json"
     }
 
+    Write-Host "Params:"
+    $params | ConvertTo-Json
+
     try {
         Write-Host "Starting rebuild of ``$($item.context)``"
         $null = Invoke-RestMethod @params
     }
     catch {
         $_ | Out-String | Write-Error
-        $message = "@$($item.user), failed to start rebuild of ``$context``"
+        $message = "@$($item.user), failed to start rebuild of ``$context``, error: $($_ | Out-String)"
         Push-GitHubComment -message $message
         return
     }
