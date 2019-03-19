@@ -15,7 +15,7 @@ $pr = Invoke-RestMethod -Uri $item.pr -Headers $headers
 
 Write-Host "Retrieving statuses from '$($pr.statuses_url)'"
 $statuses = (Invoke-RestMethod -Uri $pr.statuses_url -Headers $headers) | Where-Object {
-    $null -ne $_.target_url -and $_.target_url.StartsWith("https://powershell.visualstudio.com")
+    $null -ne $_.target_url -and $_.target_url.StartsWith("https://$($item.organization).visualstudio.com")
 }
 
 Write-Host "Got $($statuses.Count) statuses returned"
@@ -47,7 +47,7 @@ if ($null -eq $buildId) {
 $cred = [pscredential]::new("empty", (ConvertTo-SecureString -String $env:DEVOPS_ACCESSTOKEN -AsPlainText -Force))
 
 try {
-    $url = "https://dev.azure.com/powershell/powershell/_apis/build/builds/$($buildId)?api-version=5.0"
+    $url = "https://dev.azure.com/$($item.organziation)/$($item.project)/_apis/build/builds/$($buildId)?api-version=5.0"
     Write-Host "Getting build from: $url"
     $build = Invoke-RestMethod -Uri $url -Authentication Basic -Credential $cred
 }
@@ -56,7 +56,7 @@ catch {
 }
 
 $params = @{
-    Uri = "https://dev.azure.com/powershell/powershell/_apis/build/builds?api-version=5.0"
+    Uri = "https://dev.azure.com/$($item.organziation)/$($item.project)/_apis/build/builds?api-version=5.0"
     Method = "Post"
     Authentication = "Basic"
     Credential = $cred

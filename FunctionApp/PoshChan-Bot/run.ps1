@@ -54,33 +54,46 @@ if ($null -eq $pr) {
     return
 }
 
+$organization = $body.repository.owner.login
+$project = $body.repository.name
+
+Get-Config -organization $organization -project $project
+
 $command = $commentBody.SubString($poshchanMention.Length)
 
 switch -regex ($command.TrimEnd()) {
     "Please rebuild (?<target>.+)" {
 
         $targets = $matches.target.Split(",")
-        $supportedTargets = @{
-            linux = "PowerShell-CI-linux"
-            windows = "PowerShell-CI-windows"
-            macos = "PowerShell-CI-macos"
-            "static-analysis" = "PowerShell-CI-static-analysis"
-        }
 
-        $invalid = $target | Where-Object { $supportedTargets.Keys -notcontains $_ }
+        $invalid = $target | Where-Object { $global:PoshChan_Settings.build_targets.Keys -notcontains $_ }
         if ($invalid) {
-            $supported = [string]::Join(",", ($supportedTargets | ForEach-Object { "``$_``" }))
+            $supported = [string]::Join(",", ($global:PoshChan_Settings.build_targets.Keys | ForEach-Object { "``$_``" }))
             $message = "@$user, I do not understand the build target(s) '$([string]::Join(",",$invalid))'; I only allow $supported"
             Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
             break
         }
 
+        $resolvedTargets = [System.Collections.ArrayList]::new()
         foreach ($target in $targets) {
+            if ($target.Count -gt 1) {
+                foreach ($subTarget in $target) {
+                    $null = $resolvedTargets.Add($subTarget)
+                }
+            }
+            else {
+                $null = $resolvedTargets.Add($target)
+            }
+        }
+
+        foreach ($target in ($resolvedTargets | Select-Object -Unique)) {
             $queueItem = @{
-                context = $supportedTargets.$target
+                context = $global:PoshChan_Settings.build_targets.$target
                 pr = $pr
                 commentsUrl = $body.issue.comments_url
                 user = $user
+                organization = $organization
+                project= $project
             }
 
             Write-Host "Queuing rebuild for '$($queueItem.context)'"

@@ -4,7 +4,8 @@ This Bot is designed for use with GitHub enabling requests of the Bot to perform
 
 ## Supported Commands
 
-All commands need to be directed to @PoshChan and only allowed by Maintainers of the PowerShell repo.
+All commands need to be directed to @PoshChan and only allowed by authorized users of a repository.
+Recommendation is to only allow maintainers and key contributors.
 
 * `Please rebuild <target>`
 
@@ -15,12 +16,12 @@ All commands need to be directed to @PoshChan and only allowed by Maintainers of
 
   `<time>` is an integer and `<units>` can be `minutes`, `hours`, or `days`.
   This will cause PoshChan to simply respond mentioning you after the duration specified.
-  You can use this as a way to retrigger a GitHub notification on a Pull Request you want to check on later because the tests haven't finished running.
+  You can use this as a way to re-trigger a GitHub notification on a Pull Request you want to check on later because the tests haven't finished running.
 
 ## Deploying
 
-This Bot is written as an Azure FunctionApp.  To deploy this, create your own Azure FunctionApp and publish the code
-in the `FunctionApp` folder to your Azure FunctionApp.
+This Bot is written as an Azure FunctionApp.
+To deploy this, create your own Azure FunctionApp and publish the code in the `FunctionApp` folder to your Azure FunctionApp.
 
 The Bot relies on a GitHub account to be able to post back comments to a Pull Request or Issue.  Create a custom GitHub
 account for the Bot.  Generate a Personal Access Token and store that as an environmental variable called `GITHUB_PERSONAL_ACCESS_TOKEN`
@@ -30,3 +31,26 @@ in the `Application Settings` tab as a new `App Setting Name` to keep it secure.
 
 In the `Settings` for your GitHub repository, go to `Webhooks` and add a new webhook that is the URL to your
 HTTP bound Azure Function.
+
+## Configuration
+
+A configuration file called `settings.json` should be in the `.poshchan` folder in the root of the repository.
+
+The format for this file should be:
+
+```json
+{
+  "build_targets": {
+    "linux": "Project_CI_Linux",
+    "macos": "Project_CI_macOS",
+    "windows": "Project_CI_windows"
+  },
+  "authorized_users": [
+    "GitHub_User1",
+    "GitHub_User2"
+  ]
+}
+```
+
+Where `build_targets` map to the associated build names in AzDevOpsPipelines.
+`authorized_users` are GitHub usernames authorized to make requests to PoshChan-Bot.
