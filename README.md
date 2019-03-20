@@ -41,6 +41,7 @@ The format for this file should be:
 
 ```json
 {
+  "version": "0.1",
   "build_targets": {
     "linux": "Project_CI_Linux",
     "macos": "Project_CI_macOS",
@@ -51,10 +52,13 @@ The format for this file should be:
       "Project_CI_windows"
     ]
   },
-  "authorized_users": [
-    "GitHub_User1",
-    "GitHub_User2"
-  ]
+  "authorized_users": {
+    "build_targets": [
+      "GitHub_User1",
+      "GitHub_User2"
+    ],
+    "reminders": "*"
+  }
 }
 ```
 

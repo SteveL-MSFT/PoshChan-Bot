@@ -17,8 +17,7 @@ function Write-Trace($message) {
 
 function Test-User([string] $user) {
     Write-Trace "Checking user '$user'"
-    return $user -in @(
-        $settings.authorized_users
+    return
     )
 }
 
@@ -79,6 +78,23 @@ $command = $commentBody.SubString($poshchanMention.Length)
 switch -regex ($command.TrimEnd()) {
     "Please rebuild (?<target>.+)" {
 
+        if ($null -eq $settings.build_targets) {
+            $message = "@$user, rebuilds are not enabled for this repo."
+            Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+        }
+
+        $authorized_users = $settings.authorized_users.build_targets
+        if ($authorized_users -ne "*" -and $user -notin $authorized_users) {
+            $message = "@$user, you are not authorized to request a rebuild"
+            Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+            break
+        }
+        elseif ($null -eq $authorized_users) {
+            $message = "@$user, authorized users for ``Build Targets`` hasn't been set, so this action is not allowed."
+            Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+            break
+        }
+
         $targets = $matches.target.Split(",").Trim()
 
         $invalid = $targets | Where-Object { $settings.build_targets.Keys -notcontains $_ }
@@ -118,6 +134,19 @@ switch -regex ($command.TrimEnd()) {
     }
 
     "Please remind me in (?<time>\d+) (?<units>.+)" {
+
+        $authorized_users = $settings.authorized_users.reminder
+        if ($authorized_users -ne "*" -and $user -notin $authorized_users) {
+            $message = "@$user, you are not authorized to request a rebuild"
+            Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+            break
+        }
+        elseif ($null -eq $authorized_users) {
+            $message = "@$user, authorized users for ``Reminders`` hasn't been set, so this action is not allowed."
+            Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+            break
+        }
+
         [int]$time = $matches.time
         $units = $matches.units
 
