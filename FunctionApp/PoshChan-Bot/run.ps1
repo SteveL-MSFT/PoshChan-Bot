@@ -123,9 +123,9 @@ switch -regex ($command.TrimEnd()) {
 
     "Please remind me in (?<time>\d+) (?<units>.+)" {
 
-        $authorized_users = $settings.authorized_users.reminder
+        $authorized_users = $settings.authorized_users.reminders
         if ($authorized_users -ne "*" -and $user -notin $authorized_users) {
-            $message = "@$user, you are not authorized to request a rebuild"
+            $message = "@$user, you are not authorized to request a reminder"
             Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
             break
         }
