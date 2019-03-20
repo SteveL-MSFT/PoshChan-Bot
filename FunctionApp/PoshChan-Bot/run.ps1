@@ -15,12 +15,6 @@ function Write-Trace($message) {
     }
 }
 
-function Test-User([string] $user) {
-    Write-Trace "Checking user '$user'"
-    return
-    )
-}
-
 function Send-Ok {
     Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
@@ -60,12 +54,6 @@ Write-Trace "Reading settings"
 $settings = Get-Settings -organization $organization -project $project
 
 $user = $body.comment.user.login
-if (!(Test-User $user)) {
-    Write-Warning "Unauthorized User: $user"
-    Send-Ok
-    return
-}
-
 $pr = $body.issue.pull_request.url
 if ($null -eq $pr) {
     Write-Warning "Ignoring non-PR comment"
