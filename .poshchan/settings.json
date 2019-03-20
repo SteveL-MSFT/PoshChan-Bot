@@ -1,6 +1,6 @@
 {
     "version": "0.1",
-    "authorized_users": {
-        "reminders": "*"
+    "reminders": {
+      "authorized_users": "*"
     }
 }

@@ -50,7 +50,6 @@ if ($null -eq $organization -or $null -eq $project) {
     return
 }
 
-Write-Trace "Reading settings"
 $settings = Get-Settings -organization $organization -project $project
 
 $user = $body.comment.user.login
@@ -66,12 +65,12 @@ $command = $commentBody.SubString($poshchanMention.Length)
 switch -regex ($command.TrimEnd()) {
     "Please rebuild (?<target>.+)" {
 
-        if ($null -eq $settings.build_targets) {
+        if ($null -eq $settings.azdevops -or $null -eq $settings.azdevops.authorized_users) {
             $message = "@$user, rebuilds are not enabled for this repo."
             Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
         }
 
-        $authorized_users = $settings.authorized_users.build_targets
+        $authorized_users = $settings.azdevops.authorized_users
         if ($authorized_users -ne "*" -and $user -notin $authorized_users) {
             $message = "@$user, you are not authorized to request a rebuild"
             Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
@@ -84,10 +83,10 @@ switch -regex ($command.TrimEnd()) {
         }
 
         $targets = $matches.target.Split(",").Trim()
-
-        $invalid = $targets | Where-Object { $settings.build_targets.Keys -notcontains $_ }
+        $build_targets = $settings.azdevops.build_targets.Keys
+        $invalid = $targets | Where-Object { $build_targets -notcontains $_ }
         if ($invalid) {
-            $supported = [string]::Join(", ", ($settings.build_targets.Keys | ForEach-Object { "``$_``" }))
+            $supported = [string]::Join(", ", ($build_targets | ForEach-Object { "``$_``" }))
             $message = "@$user, I do not understand the build target(s) ``$([string]::Join(", ",$invalid))``; I only allow $supported"
             Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
             break
@@ -123,7 +122,12 @@ switch -regex ($command.TrimEnd()) {
 
     "Please remind me in (?<time>\d+) (?<units>.+)" {
 
-        $authorized_users = $settings.authorized_users.reminders
+        if ($null -eq $settings.reminders -or $null -eq $settings.reminders.authorized_users) {
+            $message = "@$user, reminders are not enabled for this repo."
+            Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+        }
+
+        $authorized_users = $settings.reminders.authorized_users
         if ($authorized_users -ne "*" -and $user -notin $authorized_users) {
             $message = "@$user, you are not authorized to request a reminder"
             Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }

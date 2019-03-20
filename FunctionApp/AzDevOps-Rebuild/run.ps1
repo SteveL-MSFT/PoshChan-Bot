@@ -2,7 +2,21 @@ param([string] $QueueItem, $TriggerMetadata)
 
 $item = $QueueItem | ConvertFrom-Json
 
-Write-Host "Organization = $($item.organization), Project = $($item.project)"
+$settings = Get-Settings -organization $organization -project $project
+
+if ($null -ne $settings.azdevops -and $null -ne $settings.azdevops.organization) {
+    $organization = $settings.azdevops.organization
+}
+else {
+    $organization = $item.organization
+}
+
+if ($null -ne $settings.azdevops -and $null -ne $settings.azdevops.project) {
+    $project = $settings.azdevops.project
+}
+else {
+    $project = $item.project
+}
 
 function Push-GitHubComment($message) {
     Push-OutputBinding -Name githubrespond -Value @{ url = $item.commentsUrl; message = $message }
@@ -18,7 +32,7 @@ $cred = [pscredential]::new("empty", (ConvertTo-SecureString -String $env:DEVOPS
 
 Write-Host "Retrieving statuses from '$($pr.statuses_url)'"
 $statuses = (Invoke-RestMethod -Uri $pr.statuses_url -Headers $headers) | Where-Object {
-    $null -ne $_.target_url -and $_.target_url.StartsWith("https://$($item.organization).visualstudio.com", $true, $null)
+    $null -ne $_.target_url -and $_.target_url.StartsWith("https://$organization.visualstudio.com", $true, $null)
 }
 
 Write-Host "Got $($statuses.Count) statuses returned"
@@ -51,7 +65,7 @@ foreach ($context in $item.context) {
     }
 
     try {
-        $url = "https://dev.azure.com/$($item.organization)/$($item.project)/_apis/build/builds/$($buildId)?api-version=5.0"
+        $url = "https://dev.azure.com/$organization/$project/_apis/build/builds/$($buildId)?api-version=5.0"
         Write-Host "Getting build from: $url"
         $build = Invoke-RestMethod -Uri $url -Authentication Basic -Credential $cred
     }
@@ -63,7 +77,7 @@ foreach ($context in $item.context) {
     }
 
     $params = @{
-        Uri = "https://dev.azure.com/$($item.organization)/$($item.project)/_apis/build/builds?api-version=5.0"
+        Uri = "https://dev.azure.com/$organization/$project/_apis/build/builds?api-version=5.0"
         Method = "Post"
         Authentication = "Basic"
         Credential = $cred
