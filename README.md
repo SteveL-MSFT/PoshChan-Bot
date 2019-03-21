@@ -44,24 +44,24 @@ The format for this file should be:
   "version": "0.1",
   "azdevops": {
     "organization": "yourOrganization",
-    "project": "yourProject"
-  },
-  "build_targets": {
-    "linux": "Project_CI_Linux",
-    "macos": "Project_CI_macOS",
-    "windows": "Project_CI_windows",
-    "all": [
-      "Project_CI_Linux",
-      "Project_CI_macOS",
-      "Project_CI_windows"
+    "project": "yourProject",
+    "build_targets": {
+      "linux": "Project_CI_Linux",
+      "macos": "Project_CI_macOS",
+      "windows": "Project_CI_windows",
+      "all": [
+        "Project_CI_Linux",
+        "Project_CI_macOS",
+        "Project_CI_windows"
+      ]
+    },
+    "authorized_users": [
+      "User1",
+      "User2"
     ]
   },
-  "authorized_users": {
-    "build_targets": [
-      "GitHub_User1",
-      "GitHub_User2"
-    ],
-    "reminders": "*"
+  "reminders":
+    "authorized_users": "*"
   }
 }
 ```
