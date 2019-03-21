@@ -42,6 +42,10 @@ The format for this file should be:
 ```json
 {
   "version": "0.1",
+  "azdevops": {
+    "organization": "yourOrganization",
+    "project": "yourProject"
+  },
   "build_targets": {
     "linux": "Project_CI_Linux",
     "macos": "Project_CI_macOS",
