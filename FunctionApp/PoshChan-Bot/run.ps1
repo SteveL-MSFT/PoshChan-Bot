@@ -22,8 +22,14 @@ function Send-Ok {
 }
 
 $body = $Request.Body
-$poshchanMention = "@PoshChan "
-$poshchanStagingMention = "@PoshChan-Staging "
+
+$name = $Request.Query.Name
+if ($null -ne $name) {
+    $poshchanMention = $name
+}
+else {
+    $poshchanMention = "@PoshChan "
+}
 
 $commentBody = $body.comment.body
 if (!($commentBody.StartsWith($poshchanMention)) -and !($commentBody.StartsWith($poshchanStagingMention))) {
@@ -83,7 +89,8 @@ switch -regex ($command.TrimEnd()) {
         }
 
         $targets = $matches.target.Split(",").Trim()
-        $build_targets = $settings.azdevops.build_targets.Keys
+        $build_targets = @($settings.azdevops.build_targets.Keys)
+        Write-Host "Found build_targets: $([string]::Join(',',$build_targets))"
         $invalid = $targets | Where-Object { $build_targets -notcontains $_ }
         if ($invalid) {
             $supported = [string]::Join(", ", ($build_targets | ForEach-Object { "``$_``" }))
@@ -94,7 +101,7 @@ switch -regex ($command.TrimEnd()) {
 
         $resolvedTargets = [System.Collections.ArrayList]::new()
         foreach ($target in $targets) {
-            $context = $settings.build_targets.$target
+            $context = $settings.azdevops.build_targets.$target
             if ($context.Count -gt 1) {
                 foreach ($subTarget in $context) {
                     $resolvedTargets += $subTarget
@@ -105,8 +112,15 @@ switch -regex ($command.TrimEnd()) {
             }
         }
 
+        $context = $resolvedTargets | Select-Object -Unique
+        if ($null -eq $context) {
+            $message = "@$user, could not find a matching build target"
+            Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+            break
+        }
+
         $queueItem = @{
-            context = ($resolvedTargets | Select-Object -Unique)
+            context = $context
             pr = $pr
             commentsUrl = $body.issue.comments_url
             user = $user
@@ -114,7 +128,7 @@ switch -regex ($command.TrimEnd()) {
             project = $project
         }
 
-        Write-Host "Queuing rebuild for '$([string]::Join(", ",$queueItem.context))'"
+        Write-Host "Queuing rebuild for '$([string]::Join(", ",$context))'"
         Push-Queue -Queue azdevops-rebuild -Object $queueItem
 
         break
