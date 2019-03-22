@@ -2,7 +2,7 @@ param([string] $QueueItem, $TriggerMetadata)
 
 $item = $QueueItem | ConvertFrom-Json
 
-$settings = Get-Settings -organization $organization -project $project
+$settings = Get-Settings -organization $item.organization -project $item.project
 
 if ($null -ne $settings.azdevops -and $null -ne $settings.azdevops.organization) {
     $organization = $settings.azdevops.organization
@@ -17,6 +17,8 @@ if ($null -ne $settings.azdevops -and $null -ne $settings.azdevops.project) {
 else {
     $project = $item.project
 }
+
+Write-Host "Organization: $organization; Project: $project"
 
 function Push-GitHubComment($message) {
     Push-OutputBinding -Name githubrespond -Value @{ url = $item.commentsUrl; message = $message }
