@@ -25,7 +25,7 @@ $body = $Request.Body
 
 $name = $Request.Query.Name
 if ($null -ne $name) {
-    $poshchanMention = $name
+    $poshchanMention = "@$name "
 }
 else {
     $poshchanMention = "@PoshChan "
@@ -67,6 +67,13 @@ if ($null -eq $pr) {
 }
 
 $command = $commentBody.SubString($poshchanMention.Length)
+
+if (-not $command.StartsWith("Please ")) {
+    $message = "@$user, all requests start with the magic word `Please`."
+    Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+    Send-Ok
+    return
+}
 
 switch -regex ($command.TrimEnd()) {
     "Please rebuild (?<target>.+)" {
