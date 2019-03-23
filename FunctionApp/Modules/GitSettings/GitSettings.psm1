@@ -11,7 +11,7 @@ function Get-Settings($organization, $project) {
 
     try {
         $settingsFile = Invoke-RestMethod @params
-        [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($settingsFile.content)) | ConvertFrom-Json -AsHashtable
+        [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($settingsFile.content)) | ConvertFrom-Json
     }
     catch {
         $_ | Out-String | Write-Error

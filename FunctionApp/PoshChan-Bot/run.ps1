@@ -96,7 +96,7 @@ switch -regex ($command.TrimEnd()) {
         }
 
         $targets = $matches.target.Split(",").Trim()
-        $build_targets = @($settings.azdevops.build_targets.Keys)
+        $build_targets = @($settings.azdevops.build_targets.psobject.properties.name)
         Write-Host "Found build_targets: $([string]::Join(',',$build_targets))"
         $invalid = $targets | Where-Object { $build_targets -notcontains $_ }
         if ($invalid) {
