@@ -7,10 +7,10 @@ param($Request, $TriggerMetadata)
 # Write to the Azure Functions log stream.
 Write-Host "PoshChan-Bot received a request"
 
-$staging = $false
+$debugTrace = $false
 
 function Write-Trace($message) {
-    if ($staging) {
+    if ($debugTrace) {
         Write-Host $message
     }
 }
@@ -31,14 +31,15 @@ else {
     $poshchanMention = "@PoshChan "
 }
 
+if ($null -ne $Request.Query.DebugTrace) {
+    $debugTrace = $true
+}
+
 $commentBody = $body.comment.body
-if (!($commentBody.StartsWith($poshchanMention)) -and !($commentBody.StartsWith($poshchanStagingMention))) {
+if (!($commentBody.StartsWith($poshchanMention, $true, $null))) {
     Write-Trace "Skipping message not sent to @PoshChan"
     Send-Ok
     return
-}
-elseif ($commentBody.StartsWith($poshchanStagingMention)) {
-    $staging = $true
 }
 
 # Don't act on edited comments
@@ -68,7 +69,7 @@ if ($null -eq $pr) {
 
 $command = $commentBody.SubString($poshchanMention.Length)
 
-if (-not $command.StartsWith("Please ")) {
+if (-not $command.StartsWith("Please ", $true, $null)) {
     $message = "@$user, all requests start with the magic word ``Please``."
     Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
     Send-Ok
