@@ -60,7 +60,7 @@ The format for this file should be:
       "User2"
     ]
   },
-  "reminders":
+  "reminders": {
     "authorized_users": "*"
   }
 }
