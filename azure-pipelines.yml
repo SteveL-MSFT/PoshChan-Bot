@@ -12,4 +12,8 @@ pool:
 steps:
 - powershell: |
       Install-Module PSScriptAnalyzer -Scope CurrentUser -Force
-      Get-ChildItem -Recurse -Include *.ps1 | % { Invoke-ScriptAnalyzer -Path $_ -ExcludeRule PSAvoidUsingWriteHost } #, PSAvoidUsingConvertToSecureStringWithPlainText }
+      $results = Get-ChildItem -Recurse -Include *.ps1 | % { Invoke-ScriptAnalyzer -Path $_ -ExcludeRule PSAvoidUsingWriteHost } #, PSAvoidUsingConvertToSecureStringWithPlainText }
+      if ($null -ne $results) {
+        throw "$($results.count) PSScriptAnalyzer errors!"
+      }
+  displayName: PSScriptAnalyzer
