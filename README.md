@@ -7,8 +7,9 @@ This Bot is designed for use with GitHub enabling requests of the Bot to perform
 All commands need to be directed to @PoshChan and only allowed by authorized users of a repository.
 Recommendation is to only allow maintainers and key contributors.
 
-* `Please rebuild <target>`
+* `Please <rebuild|rerun> <target>`
 
+  The verb can be `rebuild` or `rerun`.
   `<target>` can be `windows`,`linux`,`macos`,`static-analysis` or a comma separated list of any combination.
   You can also specify `all` if you want everything rebuilt.
   This will initiate a rebuild of the current PullRequest for the specified target(s).
