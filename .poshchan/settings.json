@@ -1,6 +1,14 @@
 {
     "version": "0.1",
+    "azdevops": {
+        "organization": "SteveL-MSFT",
+        "project": "PoshChan-Bot",
+        "build_targets": {
+            "psscriptanalyzer": "PoshChan-PSScriptAnalyzer"
+        },
+        "authorized_users": "SteveL-MSFT"
+    },
     "reminders": {
-      "authorized_users": "*"
+        "authorized_users": "*"
     }
 }
