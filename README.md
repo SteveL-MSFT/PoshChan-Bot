@@ -7,12 +7,22 @@ This Bot is designed for use with GitHub enabling requests of the Bot to perform
 All commands need to be directed to @PoshChan and only allowed by authorized users of a repository.
 Recommendation is to only allow maintainers and key contributors.
 
+* `Please retry <target>`
+
+  `<target>` can be `windows`,`linux`,`macos`,`static-analysis` or a comma separated list of any combination.
+  You can also specify `all` if you want everything rebuilt.
+  This will initiate a retry of the current PullRequest for the specified target(s).
+  A retry differs from a rebuild in that it retries the failed tasks in a pipeline rather than re-executing
+  the pipeline entirely.
+
 * `Please <rebuild|rerun> <target>`
 
   The verb can be `rebuild` or `rerun`.
   `<target>` can be `windows`,`linux`,`macos`,`static-analysis` or a comma separated list of any combination.
   You can also specify `all` if you want everything rebuilt.
   This will initiate a rebuild of the current PullRequest for the specified target(s).
+  A rebuild differs from a retry in that the pipeline is re-executed entirely even if some tasks succeeded.
+  Recommendation is to use retry first.
 
 * `Please remind me in <time> <units>`
 
