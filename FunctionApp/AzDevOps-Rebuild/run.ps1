@@ -128,7 +128,7 @@ foreach ($context in $item.context) {
             }
             catch {
                 $_ | Out-String | Write-Error
-                $message = "@$($item.user), failed to start rebuild of ``$context``, error: $($_ | Out-String)"
+                $message = "@$($item.user), failed to start retry of ``$context``, error: $($_ | Out-String)"
                 Push-GitHubComment -message $message
                 return
             }
@@ -141,5 +141,5 @@ foreach ($context in $item.context) {
     }
 }
 
-$message = "@$($item.user), successfully started rebuild of ``$([string]::Join(", ", $item.context))``"
+$message = "@$($item.user), successfully started $($item.action) of ``$([string]::Join(", ", $item.context))``"
 Push-GitHubComment -message $message
