@@ -34,12 +34,13 @@ $cred = [pscredential]::new("empty", (ConvertTo-SecureString -String $env:DEVOPS
 
 Write-Host "Retrieving statuses from '$($pr.statuses_url)'"
 $statuses = (Invoke-RestMethod -Uri $pr.statuses_url -Headers $headers) | Where-Object {
-    $null -ne $_.target_url -and $_.target_url.StartsWith("https://$organization.visualstudio.com", $true, $null)
+    $null -ne $_.target_url -and ($_.target_url.StartsWith("https://$organization.visualstudio.com", $true, $null) -or
+    ($_.target_url.StartsWith("https://dev.azure.com/$organization", $true, $null)))
 }
 
-Write-Host "Got $($statuses.Count) statuses returned"
+Write-Host "Got $($statuses.Count) matching statuses"
 if ($statuses.Count -eq 0) {
-    $message = "@$($item.user), did not find any matching pull request statuses"
+    $message = "@$($item.user), did not find any matching pull request checks"
     Push-GitHubComment -message $message
     return
 }
@@ -72,8 +73,9 @@ foreach ($context in $item.context) {
         $build = Invoke-RestMethod -Uri $url -Authentication Basic -Credential $cred
     }
     catch {
-        $_ | Out-String | Write-Error
-        $message = "@$($item.user), could not find build at: $url"
+        $e = $_ | Out-String
+        $e | Write-Error
+        $message = "@$($item.user), could not find build at: $url, error: $e"
         Push-GitHubComment -message $message
         return
     }

@@ -80,7 +80,7 @@ if (-not $command.StartsWith("Please ", $true, $null)) {
 }
 
 switch -regex ($command.TrimEnd()) {
-    "Please rebuild (?<target>.+)" {
+    "Please (rebuild|rerun) (?<target>.+)" {
 
         if ($null -eq $settings.azdevops -or $null -eq $settings.azdevops.authorized_users) {
             $message = "@$user, rebuilds are not enabled for this repo."
