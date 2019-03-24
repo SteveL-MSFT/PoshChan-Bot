@@ -8,6 +8,7 @@ param($Request, $TriggerMetadata)
 Write-Host "PoshChan-Bot received a request"
 
 $debugTrace = $false
+$body = $Request.Body
 
 function Write-Trace($message) {
     if ($debugTrace) {
@@ -15,13 +16,15 @@ function Write-Trace($message) {
     }
 }
 
+function Push-GitHubComment($message) {
+    Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+}
+
 function Send-Ok {
     Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
     })
 }
-
-$body = $Request.Body
 
 $name = $Request.Query.Name
 if ($null -ne $name) {
@@ -71,7 +74,7 @@ $command = $commentBody.SubString($poshchanMention.Length)
 
 if (-not $command.StartsWith("Please ", $true, $null)) {
     $message = "@$user, all requests start with the magic word ``Please``."
-    Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+    Push-GitHubComment -message $message
     Send-Ok
     return
 }
@@ -81,18 +84,18 @@ switch -regex ($command.TrimEnd()) {
 
         if ($null -eq $settings.azdevops -or $null -eq $settings.azdevops.authorized_users) {
             $message = "@$user, rebuilds are not enabled for this repo."
-            Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+            Push-GitHubComment -message $message
         }
 
         $authorized_users = $settings.azdevops.authorized_users
         if ($authorized_users -ne "*" -and $user -notin $authorized_users) {
             $message = "@$user, you are not authorized to request a rebuild"
-            Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+            Push-GitHubComment -message $message
             break
         }
         elseif ($null -eq $authorized_users) {
             $message = "@$user, authorized users for ``Build Targets`` hasn't been set, so this action is not allowed."
-            Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+            Push-GitHubComment -message $message
             break
         }
 
@@ -103,7 +106,7 @@ switch -regex ($command.TrimEnd()) {
         if ($invalid) {
             $supported = [string]::Join(", ", ($build_targets | ForEach-Object { "``$_``" }))
             $message = "@$user, I do not understand the build target(s) ``$([string]::Join(", ",$invalid))``; I only allow $supported"
-            Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+            Push-GitHubComment -message $message
             break
         }
 
@@ -123,7 +126,7 @@ switch -regex ($command.TrimEnd()) {
         $context = $resolvedTargets | Select-Object -Unique
         if ($null -eq $context) {
             $message = "@$user, could not find a matching build target"
-            Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+            Push-GitHubComment -message $message
             break
         }
 
@@ -146,18 +149,18 @@ switch -regex ($command.TrimEnd()) {
 
         if ($null -eq $settings.reminders -or $null -eq $settings.reminders.authorized_users) {
             $message = "@$user, reminders are not enabled for this repo."
-            Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+            Push-GitHubComment -message $message
         }
 
         $authorized_users = $settings.reminders.authorized_users
         if ($authorized_users -ne "*" -and $user -notin $authorized_users) {
             $message = "@$user, you are not authorized to request a reminder"
-            Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+            Push-GitHubComment -message $message
             break
         }
         elseif ($null -eq $authorized_users) {
             $message = "@$user, authorized users for ``Reminders`` hasn't been set, so this action is not allowed."
-            Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+            Push-GitHubComment -message $message
             break
         }
 
@@ -182,13 +185,13 @@ switch -regex ($command.TrimEnd()) {
 
             default {
                 $message = "@$user, I do not understand '$units'; I only allow ``minutes``,``hours``, and ``days``"
-                Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+                Push-GitHubComment -message $message
                 break
             }
         }
 
         $message = "@$user, will remind you in $time $units"
-        Push-Queue -Queue github-respond -Object @{ url = $body.issue.comments_url; message = $message }
+        Push-GitHubComment -message $message
 
         $message = "@$user, this is the reminder you requested $time $units ago"
         Push-Queue -Queue github-respond -Object @{ url = $body.issue.comments_url; message = $message } -VisibilitySeconds $timeSeconds
@@ -196,7 +199,7 @@ switch -regex ($command.TrimEnd()) {
 
     default {
         $message = "@$user, I do not understand: $command"
-        Push-OutputBinding -Name githubrespond -Value @{ url = $body.issue.comments_url; message = $message }
+        Push-GitHubComment -message $message
         break
     }
 }
