@@ -80,7 +80,7 @@ if (-not $command.StartsWith("Please ", $true, $null)) {
 }
 
 switch -regex ($command.TrimEnd()) {
-    "Please (rebuild|rerun) (?<target>.+)" {
+    "Please (<action>rebuild|rerun|retry) (?<target>.+)" {
 
         if ($null -eq $settings.azdevops -or $null -eq $settings.azdevops.authorized_users) {
             $message = "@$user, rebuilds are not enabled for this repo."
@@ -97,6 +97,12 @@ switch -regex ($command.TrimEnd()) {
             $message = "@$user, authorized users for ``Build Targets`` hasn't been set, so this action is not allowed."
             Push-GitHubComment -message $message
             break
+        }
+
+        $action = $matches.action.ToLower()
+        # rerun == rebuild
+        if ($action -eq "rerun") {
+            $action = "rebuild"
         }
 
         $targets = $matches.target.Split(",").Trim()
@@ -132,6 +138,7 @@ switch -regex ($command.TrimEnd()) {
 
         $queueItem = @{
             context = $context
+            action = $action
             pr = $pr
             commentsUrl = $body.issue.comments_url
             user = $user
