@@ -116,14 +116,15 @@ foreach ($context in $item.context) {
         }
 
         "retry" {
+            $params = @{
+                Uri = "https://dev.azure.com/$organization/$project/_apis/build/builds/$($buildId)?api-version=5.0&retry=true"
+                Method = "Patch"
+                Authentication = "Basic"
+                Credential = $cred
+            }
+
             try {
                 Write-Host "Starting retry of ``$($item.context)``"
-                $params = @{
-                    Uri = "https://dev.azure.com/$organization/$project/_apis/build/builds?api-version=5.0&retry=true"
-                    Method = "Patch"
-                    Authentication = "Basic"
-                    Credential = $cred
-                }
                 $null = Invoke-RestMethod @params
             }
             catch {
