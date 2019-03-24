@@ -68,3 +68,24 @@ The format for this file should be:
 
 Where `build_targets` map to the associated build names in AzDevOpsPipelines.
 `authorized_users` are GitHub usernames authorized to make requests to PoshChan-Bot.
+
+## Testing
+
+Before deploying a new version of PoshChan to production, recommendation is to
+create another FunctionApp called PoshChan-Staging and publish to that first.
+Create an alternate GitHub account so that the two are independent.
+For the staging account, be sure the webhook specifies its alternate name:
+
+```url
+https://poshchan-bot-staging.azurewebsites.net/api/poshchan-bot?code=...&name=PoshChan-Staging
+```
+
+In this example, the staging bot will only respond to commands sent to `PoshChan-Staging` as
+specified by the name given in the webhook.
+
+You can also specify the `DebugTrace` parameter in the URL to get additional tracing
+sent to Application Insights:
+
+```url
+https://poshchan-bot-staging.azurewebsites.net/api/poshchan-bot?code=...&name=PoshChan-Staging&debugtrace=1
+```
