@@ -38,3 +38,45 @@ function Invoke-DevOpsRetry($Organization, $Project, $BuildId) {
 
     $null = Invoke-RestMethod @params
 }
+
+function Get-DevOpsTestFailures($Organization, $Project, $BuildUri) {
+    if ($null -ne $env:BUILD_BUILDURI) {
+        $buildUri = $env:BUILD_BUILDURI
+        $buildId = $env:BUILD_BUILDID
+    }
+    else {
+        $buildId = Split-Path $buildUri -Leaf
+    }
+
+    $params = @{
+        Uri = "https://dev.azure.com/$organization/$project/_apis/test/runs?api-version=5.0&buildUri=$([uri]::EscapeDataString($buildUri))&includeRunDetails=true"
+        Authentication = "Basic"
+        Credential = $cred
+    }
+
+    $runs = Invoke-RestMethod @params
+    $failedRuns = $runs.Value | Where-Object { $_.totalTests -ne $_.passedTests }
+    $failedTests = foreach ($failedRun in $failedRuns) {
+        $params.Uri = "https://dev.azure.com/$organization/$project/_apis/test/Runs/$($failedRun.id)/results?api-version=5.0&outcomes=failed"
+        $params.Method = "Get"
+        Invoke-RestMethod @params
+    }
+    $failedTests.Value | Sort-Object completedDate -Descending | Sort-Object id -Unique | Select-Object testCaseTitle, errorMessage, stackTrace
+}
+
+function Get-DevOpsOrgAndProject($Settings, $DefaultOrganization, $DefaultProject) {
+    if ($null -ne $settings.azdevops -and $null -ne $settings.azdevops.organization) {
+        $organization = $settings.azdevops.organization
+    }
+    else {
+        $organization = $DefaultOrganization
+    }
+
+    if ($null -ne $settings.azdevops -and $null -ne $settings.azdevops.project) {
+        $project = $settings.azdevops.project
+    }
+    else {
+        $project = $DefaultProject
+    }
+    $organization, $project
+}

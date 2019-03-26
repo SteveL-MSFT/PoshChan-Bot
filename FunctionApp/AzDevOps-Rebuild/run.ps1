@@ -4,19 +4,7 @@ $item = $QueueItem | ConvertFrom-Json
 
 $settings = Get-Settings -organization $item.organization -project $item.project
 
-if ($null -ne $settings.azdevops -and $null -ne $settings.azdevops.organization) {
-    $organization = $settings.azdevops.organization
-}
-else {
-    $organization = $item.organization
-}
-
-if ($null -ne $settings.azdevops -and $null -ne $settings.azdevops.project) {
-    $project = $settings.azdevops.project
-}
-else {
-    $project = $item.project
-}
+$organization, $project = Get-DevOpsOrgAndProject -Settings $settings -DefaultOrganization $item.organization -DefaultProject $item.project
 
 Write-Host "Organization: $organization; Project: $project"
 
@@ -28,7 +16,7 @@ Write-Host "Retrieving PR from '$($item.pr)'"
 $pr = Get-GitHubPullRequest -PullRequestUrl $item.pr
 
 Write-Host "Retrieving statuses from '$($pr.statuses_url)'"
-$statuses = Get-GitHubPullRequestStatuses -PullRequestUrl $item.pr
+$statuses = Get-GitHubPullRequestStatuses -PullRequestStatusesUrl $pr.statuses_url -Organization $organization
 
 Write-Host "Got $($statuses.Count) matching statuses"
 if ($statuses.Count -eq 0) {
@@ -87,7 +75,7 @@ foreach ($context in $item.context) {
         "retry" {
             try {
                 Write-Host "Starting retry of ``$($item.context)``"
-                Invoke-DevOpsRetry -Organization $organization -Proejct $project -BuildId $buildId
+                Invoke-DevOpsRetry -Organization $organization -Project $project -BuildId $buildId
             }
             catch {
                 $_ | Out-String | Write-Error
