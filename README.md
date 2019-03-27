@@ -54,6 +54,10 @@ in the `Application Settings` tab as a new `App Setting Name` to keep it secure.
 In the `Settings` for your GitHub repository, go to `Webhooks` and add a new webhook that is the URL to your
 HTTP bound Azure Function.
 
+For the `AzDevOps`, `Reminders`, and requesting `failures` capabilities, the `Issue Comments` event must be enabled for the webhook.
+For the `failures` capability to automatically post test failures for a Pull Request, the
+`Statuses` event must be enabled for the webhook.
+
 ## Configuration
 
 A configuration file called `settings.json` should be in the `.poshchan` folder in the root of the repository.
