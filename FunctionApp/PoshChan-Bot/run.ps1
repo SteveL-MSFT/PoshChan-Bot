@@ -92,8 +92,9 @@ switch ($githubEvent) {
 
         switch -regex ($command.TrimEnd()) {
             "Please get (last )?(test )?failures" {
-                if ($user -ne "SteveL-MSFT") {
-                    Write-Error "Not SteveL-MSFT"
+                if (Test-User -User $user -Settings $settings -Setting failures) {
+                    $message = "@$user, you are not authorized to request test failures"
+                    Push-GitHubComment -message $message
                     break
                 }
 
@@ -121,19 +122,8 @@ switch ($githubEvent) {
             }
 
             "Please (?<action>rebuild|rerun|retry) (?<target>.+)" {
-                if ($null -eq $settings.azdevops -or $null -eq $settings.azdevops.authorized_users) {
-                    $message = "@$user, rebuilds are not enabled for this repo."
-                    Push-GitHubComment -message $message
-                }
-
-                $authorized_users = $settings.azdevops.authorized_users
-                if ($authorized_users -ne "*" -and $user -notin $authorized_users) {
+                if (Test-User -User $user -Settings $settings -Setting azdevops) {
                     $message = "@$user, you are not authorized to request a rebuild"
-                    Push-GitHubComment -message $message
-                    break
-                }
-                elseif ($null -eq $authorized_users) {
-                    $message = "@$user, authorized users for ``Build Targets`` hasn't been set, so this action is not allowed."
                     Push-GitHubComment -message $message
                     break
                 }
@@ -191,19 +181,8 @@ switch ($githubEvent) {
             }
 
             "Please remind me in (?<time>\d+) (?<units>.+)" {
-                if ($null -eq $settings.reminders -or $null -eq $settings.reminders.authorized_users) {
-                    $message = "@$user, reminders are not enabled for this repo."
-                    Push-GitHubComment -message $message
-                }
-
-                $authorized_users = $settings.reminders.authorized_users
-                if ($authorized_users -ne "*" -and $user -notin $authorized_users) {
-                    $message = "@$user, you are not authorized to request a reminder"
-                    Push-GitHubComment -message $message
-                    break
-                }
-                elseif ($null -eq $authorized_users) {
-                    $message = "@$user, authorized users for ``Reminders`` hasn't been set, so this action is not allowed."
+                if (Test-User -User $user -Settings $settings -Setting reminders) {
+                    $message = "@$user, you are not authorized to request reminders"
                     Push-GitHubComment -message $message
                     break
                 }
@@ -256,8 +235,8 @@ switch ($githubEvent) {
             Write-Host "GitHub org: $githubOrganization, project: $githubProject"
 
             $committer = $request.body.commit.committer.login
-            if ($committer -ne "SteveL-MSFT") {
-                Write-Error "Committer is not SteveL-MSFT"
+            if (Test-User -User $committer -Settings $settings -Setting failures) {
+                Write-Error "@$committer is not authorized for automatic test failures"
                 break
             }
 
