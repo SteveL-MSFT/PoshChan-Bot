@@ -4,19 +4,7 @@ $item = $QueueItem | ConvertFrom-Json
 
 $settings = Get-Settings -organization $item.organization -project $item.project
 
-if ($null -ne $settings.azdevops -and $null -ne $settings.azdevops.organization) {
-    $organization = $settings.azdevops.organization
-}
-else {
-    $organization = $item.organization
-}
-
-if ($null -ne $settings.azdevops -and $null -ne $settings.azdevops.project) {
-    $project = $settings.azdevops.project
-}
-else {
-    $project = $item.project
-}
+$organization, $project = Get-DevOpsOrgAndProject -Settings $settings -DefaultOrganization $item.organization -DefaultProject $item.project
 
 Write-Host "Organization: $organization; Project: $project"
 
@@ -25,18 +13,10 @@ function Push-GitHubComment($message) {
 }
 
 Write-Host "Retrieving PR from '$($item.pr)'"
-$headers = @{
-    Authorization = "token $($env:GITHUB_PERSONAL_ACCESS_TOKEN)"
-}
-$pr = Invoke-RestMethod -Uri $item.pr -Headers $headers
-
-$cred = [pscredential]::new("empty", (ConvertTo-SecureString -String $env:DEVOPS_ACCESSTOKEN -AsPlainText -Force))
+$pr = Get-GitHubPullRequest -PullRequestUrl $item.pr
 
 Write-Host "Retrieving statuses from '$($pr.statuses_url)'"
-$statuses = (Invoke-RestMethod -Uri $pr.statuses_url -Headers $headers) | Where-Object {
-    $null -ne $_.target_url -and ($_.target_url.StartsWith("https://$organization.visualstudio.com", $true, $null) -or
-    ($_.target_url.StartsWith("https://dev.azure.com/$organization", $true, $null)))
-}
+$statuses = Get-GitHubPullRequestStatuses -PullRequestStatusesUrl $pr.statuses_url -Organization $organization
 
 Write-Host "Got $($statuses.Count) matching statuses"
 if ($statuses.Count -eq 0) {
@@ -68,9 +48,8 @@ foreach ($context in $item.context) {
     }
 
     try {
-        $url = "https://dev.azure.com/$organization/$project/_apis/build/builds/$($buildId)?api-version=5.0"
-        Write-Host "Getting build from: $url"
-        $build = Invoke-RestMethod -Uri $url -Authentication Basic -Credential $cred
+        Write-Host "Getting build for ``$($item.context)``"
+        $build = Get-DevOpsBuild -Organization $organization -Project $project -BuildId $buildId
     }
     catch {
         $e = $_ | Out-String
@@ -82,30 +61,8 @@ foreach ($context in $item.context) {
 
     switch ($item.action) {
         "rebuild" {
-            $params = @{
-                Uri = "https://dev.azure.com/$organization/$project/_apis/build/builds?api-version=5.0"
-                Method = "Post"
-                Authentication = "Basic"
-                Credential = $cred
-                Body = @{
-                    buildNumberRevision = [int]($build.buildNumberRevision) + 1
-                    id = $build.id
-                    definition = $build.definition
-                    sourceVersion = $build.sourceVersion
-                    sourceBranch = $build.sourceBranch
-                    buildNumber = $build.buildNumber
-                    parameters = $build.parameters
-                    triggerInfo = $build.triggerInfo
-                } | ConvertTo-Json
-                ContentType = "application/json"
-            }
-
-            Write-Host "Params:"
-            $params | ConvertTo-Json
-
             try {
-                Write-Host "Starting rebuild of ``$($item.context)``"
-                $null = Invoke-RestMethod @params
+                Invoke-DevOpsRebuild -Organization $organization -Project $project -Build $build
             }
             catch {
                 $_ | Out-String | Write-Error
@@ -113,19 +70,18 @@ foreach ($context in $item.context) {
                 Push-GitHubComment -message $message
                 return
             }
+            break
         }
 
         "retry" {
-            $params = @{
-                Uri = "https://dev.azure.com/$organization/$project/_apis/build/builds/$($buildId)?api-version=5.0&retry=true"
-                Method = "Patch"
-                Authentication = "Basic"
-                Credential = $cred
+            if ($build.result -ne 'failed') {
+                Write-Host "Skipping '$context' as it isn't 'failed', but '$($build.result)'"
+                break
             }
 
             try {
-                Write-Host "Starting retry of ``$($item.context)``"
-                $null = Invoke-RestMethod @params
+                Write-Host "Starting retry of ``$context``"
+                Invoke-DevOpsRetry -Organization $organization -Project $project -BuildId $buildId
             }
             catch {
                 $_ | Out-String | Write-Error
@@ -133,11 +89,13 @@ foreach ($context in $item.context) {
                 Push-GitHubComment -message $message
                 return
             }
+            break
         }
 
         default {
             $message = "@$($item.user), unknown AzDevOps action ``$($item.action)``"
             Push-GitHubComment -message $message
+            break
         }
     }
 }

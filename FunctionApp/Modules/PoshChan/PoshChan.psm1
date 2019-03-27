@@ -17,3 +17,15 @@ function Get-Settings($organization, $project) {
         $_ | Out-String | Write-Error
     }
 }
+
+function Test-User($user, $settings, $setting) {
+    if ($null -eq $settings.$setting -or $null -eq $settings.$setting.authorized_users) {
+        return $false
+    }
+
+    if ($settings.$setting -eq "*" -or $user -in $settings.$setting.authorized_users) {
+        return $true
+    }
+
+    $false
+}
