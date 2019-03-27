@@ -48,7 +48,7 @@ foreach ($context in $item.context) {
     }
 
     try {
-        Write-Host "Starting rebuild of ``$($item.context)``"
+        Write-Host "Getting build for ``$($item.context)``"
         $build = Get-DevOpsBuild -Organization $organization -Project $project -BuildId $buildId
     }
     catch {
@@ -70,11 +70,17 @@ foreach ($context in $item.context) {
                 Push-GitHubComment -message $message
                 return
             }
+            break
         }
 
         "retry" {
+            if ($build.result -ne 'failed') {
+                Write-Host "Skipping '$context' as it isn't 'failed', but '$($build.result)'"
+                break
+            }
+
             try {
-                Write-Host "Starting retry of ``$($item.context)``"
+                Write-Host "Starting retry of ``$context``"
                 Invoke-DevOpsRetry -Organization $organization -Project $project -BuildId $buildId
             }
             catch {
@@ -83,11 +89,13 @@ foreach ($context in $item.context) {
                 Push-GitHubComment -message $message
                 return
             }
+            break
         }
 
         default {
             $message = "@$($item.user), unknown AzDevOps action ``$($item.action)``"
             Push-GitHubComment -message $message
+            break
         }
     }
 }

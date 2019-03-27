@@ -13,8 +13,6 @@ if ($null -eq $message) {
 Write-Host "Posting message:`n$message"
 Write-Host "To URL: $url"
 
-$message = [System.Web.HttpUtility]::JavaScriptStringEncode($message)
-
 $json = @{
     body = $message
 } | ConvertTo-Json -Compress

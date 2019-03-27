@@ -6,7 +6,6 @@ param($Request, $TriggerMetadata)
 
 # Write to the Azure Functions log stream.
 Write-Host "PoshChan-Bot received a request"
-$request | out-string | write-host
 
 $debugTrace = $false
 $body = $Request.Body
@@ -22,7 +21,8 @@ function Push-GitHubComment($message, $url) {
         $url = $body.issue.comments_url
     }
 
-    Push-OutputBinding -Name githubrespond -Value @{ url = $url; message = $message }
+    Push-Queue -Queue github-respond -Object @{ url = $url; message = $message }
+    #Push-OutputBinding -Name githubrespond -Value @{ url = $url; message = $message }
 }
 
 function Send-Ok {
@@ -91,8 +91,36 @@ switch ($githubEvent) {
         }
 
         switch -regex ($command.TrimEnd()) {
-            "Please (?<action>rebuild|rerun|retry) (?<target>.+)" {
+            "Please get (last )?(test )?failures" {
+                if ($user -ne "SteveL-MSFT") {
+                    Write-Error "Not SteveL-MSFT"
+                    break
+                }
 
+                $githubPr = Get-GitHubPullRequest -PullRequestUrl $pr
+                Write-Host "Using statuses url: $($githubPr.statuses_url)"
+
+                $statuses = Get-GitHubPullRequestStatuses -PullRequestStatusesUrl $githubPr.statuses_url -Organization $organization
+                Write-Host "Got '$($statuses.count)' statuses returned"
+
+                foreach ($status in $statuses) {
+                    if ($status.target_url -match "^.*?\?buildId=(?<buildId>[0-9]+)") {
+                        $buildId = $matches.buildId
+                    }
+                    else {
+                        Write-Error "Could not extract buildId from '$($status.Body.target_url)'"
+                        break
+                    }
+
+                    $devOpsOrganization, $devOpsProject = Get-DevOpsOrgAndProject -Settings $settings -DefaultOrganization $organization -DefaultProject $project
+                    $message = Get-DevOpsTestFailuresMessage -User $user -Organization $devOpsOrganization -Project $devOpsProject -BuildId $buildId
+                    if ($message) {
+                        Push-GitHubComment -message $message -url $githubPr.comments_url
+                    }
+                }
+            }
+
+            "Please (?<action>rebuild|rerun|retry) (?<target>.+)" {
                 if ($null -eq $settings.azdevops -or $null -eq $settings.azdevops.authorized_users) {
                     $message = "@$user, rebuilds are not enabled for this repo."
                     Push-GitHubComment -message $message
@@ -157,13 +185,12 @@ switch ($githubEvent) {
                     project = $project
                 }
 
-                Write-Host "Queuing rebuild for '$([string]::Join(", ",$context))'"
+                Write-Host "Queuing $action for '$([string]::Join(", ",$context))'"
                 Push-Queue -Queue azdevops-rebuild -Object $queueItem
                 break
             }
 
             "Please remind me in (?<time>\d+) (?<units>.+)" {
-
                 if ($null -eq $settings.reminders -or $null -eq $settings.reminders.authorized_users) {
                     $message = "@$user, reminders are not enabled for this repo."
                     Push-GitHubComment -message $message
@@ -225,15 +252,8 @@ switch ($githubEvent) {
 
     "status" {
         if ($Request.Body.state -eq "failure") {
-            $githubOrganization, $githubProject = $Request.Body.Name.Split("/")
-
-            if ($Request.Body.Description -match "^#PR-(?<prId>[0-9]+)-.*?") {
-                $prId = $matches.prId
-            }
-            else {
-                Write-Error "Could not extract PR id from '$($Request.Body.Description)'"
-                break
-            }
+            $githubOrganization, $githubProject = $Request.Body.name.Split("/")
+            Write-Host "GitHub org: $githubOrganization, project: $githubProject"
 
             $committer = $request.body.commit.committer.login
             if ($committer -ne "SteveL-MSFT") {
@@ -250,26 +270,13 @@ switch ($githubEvent) {
             }
 
             $devOpsOrganization, $devOpsProject = Get-DevOpsOrgAndProject -Settings $settings -DefaultOrganization $githubOrganization -DefaultProject $githubProject
+            $message = Get-DevOpsTestFailuresMessage -User $committer -Organization $devOpsOrganization -Project $devOpsProject -BuildId $buildId
             $build = Get-DevOpsBuild -Organization $devOpsOrganization -Project $devOpsProject -BuildId $buildId
-            $failures = Get-DevOpsTestFailures -Organization $settings.azdevops.organization -Project $settings.azdevops.project -BuildUri $build.uri
-            $sb = [System.Text.StringBuilder]::new()
-            $null = $sb.Append("@$committer, your last commit had $($failures.Count) failures in $($Request.Body.Context):`n")
-            $count = $failures.Count
-            if ($count -gt 10) {
-                $null = $sb.Append("(These are 10 of the failures)")
-                $count = 10
-            }
-
-            for ($i = 0; $i -lt $count; $i++) {
-                $null = $sb.Append("### $($failures[$i].testcaseTitle)`n")
-                $null = $sb.Append("  Error: $($failures[$i].errorMessage)`n")
-                $null = $sb.Append("``````stacktrace`n")
-                $null = $sb.Append($failures[$i].stacktrace)
-                $null = $sb.Append("`n```````n")
-            }
-
-            $message = $sb.ToString()
-            $githubPr = Get-GitHubPullRequest -PullRequestUrl "https://api.github.com/repos/$githubOrganziation/$githubProject/issues/$prId"
+            $prId = $build.triggerInfo."pr.number"
+            Write-Host "Found GitHub PR: $prId"
+            $prUrl = "https://api.github.com/repos/$githubOrganization/$githubProject/issues/$prId"
+            Write-Host "Getting GitHub PR from: $prUrl"
+            $githubPr = Get-GitHubPullRequest -PullRequestUrl $prUrl
             Push-GitHubComment -message $message -url $githubPr.comments_url
             break
         }

@@ -71,6 +71,12 @@ The format for this file should be:
       "User2"
     ]
   },
+  "testfailures": {
+    "authorized_users": [
+      "User1",
+      "User2"
+    ]
+  },
   "reminders": {
     "authorized_users": "*"
   }
