@@ -83,7 +83,7 @@ switch ($githubEvent) {
         $command = $commentBody.SubString($poshchanMention.Length)
 
         if (-not $command.StartsWith("Please ", $true, $null)) {
-            $message = "@$user, all requests start with the magic word ``Please``."
+            $message = "@$user,`n![all requests start with the magic word: Please](https://raw.githubusercontent.com/SteveL-MSFT/PoshChan-Bot/master/Assets/magicword.gif)."
             Push-GitHubComment -message $message
             Send-Ok
             return
