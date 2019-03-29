@@ -34,6 +34,15 @@ function Send-Ok {
 $githubEvent = $Request.Headers."X-GitHub-Event"
 Write-Host "Received a '$githubEvent' event"
 
+$organization = $body.repository.owner.login
+$project = $body.repository.name
+if ($null -eq $organization -or $null -eq $project) {
+    Write-Error "Organization or Project was null"
+    Send-Ok
+    return
+}
+$settings = Get-Settings -organization $organization -project $project
+
 switch ($githubEvent) {
 
     "issue_comment" {
@@ -63,16 +72,6 @@ switch ($githubEvent) {
             return
         }
 
-        $organization = $body.repository.owner.login
-        $project = $body.repository.name
-        if ($null -eq $organization -or $null -eq $project) {
-            Write-Error "Organization or Project was null"
-            Send-Ok
-            return
-        }
-
-        $settings = Get-Settings -organization $organization -project $project
-
         $user = $body.comment.user.login
         $pr = $body.issue.pull_request.url
         if ($null -eq $pr) {
@@ -92,7 +91,7 @@ switch ($githubEvent) {
 
         switch -regex ($command.TrimEnd()) {
             "Please get (last )?(test )?failures" {
-                if (Test-User -User $user -Settings $settings -Setting failures) {
+                if (!(Test-User -User $user -Settings $settings -Setting failures)) {
                     $message = "@$user, you are not authorized to request test failures"
                     Push-GitHubComment -message $message
                     break
@@ -114,7 +113,7 @@ switch ($githubEvent) {
                     }
 
                     $devOpsOrganization, $devOpsProject = Get-DevOpsOrgAndProject -Settings $settings -DefaultOrganization $organization -DefaultProject $project
-                    $message = Get-DevOpsTestFailuresMessage -User $user -Organization $devOpsOrganization -Project $devOpsProject -BuildId $buildId
+                    $message = Get-DevOpsTestFailuresMessage -User $user -Organization $devOpsOrganization -Project $devOpsProject -BuildId $buildId -postNoFailures
                     if ($message) {
                         Push-GitHubComment -message $message -url $githubPr.comments_url
                     }
@@ -122,7 +121,7 @@ switch ($githubEvent) {
             }
 
             "Please (?<action>rebuild|rerun|retry) (?<target>.+)" {
-                if (Test-User -User $user -Settings $settings -Setting azdevops) {
+                if (!(Test-User -User $user -Settings $settings -Setting azdevops)) {
                     $message = "@$user, you are not authorized to request a rebuild"
                     Push-GitHubComment -message $message
                     break
@@ -181,7 +180,7 @@ switch ($githubEvent) {
             }
 
             "Please remind me in (?<time>\d+) (?<units>.+)" {
-                if (Test-User -User $user -Settings $settings -Setting reminders) {
+                if (!(Test-User -User $user -Settings $settings -Setting reminders)) {
                     $message = "@$user, you are not authorized to request reminders"
                     Push-GitHubComment -message $message
                     break
@@ -235,7 +234,7 @@ switch ($githubEvent) {
             Write-Host "GitHub org: $githubOrganization, project: $githubProject"
 
             $committer = $request.body.commit.committer.login
-            if (Test-User -User $committer -Settings $settings -Setting failures) {
+            if (!(Test-User -User $committer -Settings $settings -Setting failures)) {
                 Write-Error "@$committer is not authorized for automatic test failures"
                 break
             }

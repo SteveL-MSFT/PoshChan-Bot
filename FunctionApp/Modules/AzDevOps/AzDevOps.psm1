@@ -81,10 +81,23 @@ function Get-DevOpsTestFailures($Organization, $Project, $BuildUri) {
         throw $_
     }
 
+    Write-Host "Got '$($runs.count)' runs"
+    if ($runs.count -eq 0) {
+        return
+    }
+
     $failedRuns = $runs.Value | Where-Object { $_.totalTests -ne $_.passedTests }
+    Write-Host "Got '$($failedRuns.Count)' failed runs"
+    if ($failedRuns.Count -eq 0) {
+        return
+    }
+
     $failedTests = foreach ($failedRun in $failedRuns) {
         $params.Uri = "https://dev.azure.com/$organization/$project/_apis/test/Runs/$($failedRun.id)/results?api-version=5.0&outcomes=failed"
         $params.Method = "Get"
+
+        Write-Host "Getting failed tests from: $($params.Uri)"
+
         try {
             Invoke-RestMethod @params
         }
@@ -93,7 +106,10 @@ function Get-DevOpsTestFailures($Organization, $Project, $BuildUri) {
             throw $_
         }
     }
-    $failedTests.Value | Sort-Object completedDate -Descending | Sort-Object id -Unique | Select-Object testCaseTitle, errorMessage, stackTrace
+
+    $failed = $failedTests.Value | Sort-Object completedDate -Descending | Sort-Object id -Unique | Select-Object testCaseTitle, errorMessage, stackTrace
+    Write-Host "Got '$($failed.count)' failed tests"
+    $failed
 }
 
 function Get-DevOpsOrgAndProject($Settings, $DefaultOrganization, $DefaultProject) {
@@ -113,13 +129,16 @@ function Get-DevOpsOrgAndProject($Settings, $DefaultOrganization, $DefaultProjec
     $organization, $project
 }
 
-function Get-DevOpsTestFailuresMessage($User, $Organization, $Project, $BuildId) {
+function Get-DevOpsTestFailuresMessage($User, $Organization, $Project, $BuildId, [switch]$postNoFailures) {
     $build = Get-DevOpsBuild -Organization $Organization -Project $Project -BuildId $buildId
     $failures = Get-DevOpsTestFailures -Organization $Organization -Project $Project -BuildUri $build.uri
     $sb = [System.Text.StringBuilder]::new()
+    if ($null -eq $failures -and $postNoFailures) {
+        return "@$user, test results were not published for $($build.definition.name) at $($build.uri)"
+    }
     $count = $failures.Count
-    if ($count -eq 0) {
-        return
+    if ($count -eq 0 -and $postNoFailures) {
+        return "@$user, did not find any test failures for $($build.definition.name)"
     }
 
     $null = $sb.Append("@$user, your last commit had ")

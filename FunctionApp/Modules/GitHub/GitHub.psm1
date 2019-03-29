@@ -14,11 +14,11 @@ function Get-GitHubPullRequest($PullRequestUrl) {
 
 function Get-GitHubPullRequestStatuses($PullRequestStatusesUrl, $Organization) {
     try {
-        $statuses = Invoke-RestMethod -Uri $PullRequestStatusesUrl -Headers $headers | Where-Object {
+        $statuses = Invoke-RestMethod -Uri $PullRequestStatusesUrl -Headers $headers
+        $statuses | Where-Object {
             $null -ne $_.target_url -and ($_.target_url.StartsWith("https://$organization.visualstudio.com", $true, $null) -or
             ($_.target_url.StartsWith("https://dev.azure.com/$organization", $true, $null)))
-        }
-        $statuses | Sort-Object updated_at | Sort-Object context -Unique
+        } | Sort-Object updated_at | Sort-Object context -Unique
     }
     catch {
         $_ | Out-String | Write-Error
