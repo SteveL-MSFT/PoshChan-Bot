@@ -147,15 +147,15 @@ function Get-DevOpsTestFailuresMessage($User, $Organization, $Project, $BuildId,
     }
     $null = $sb.Append("failures in ``$($build.definition.name)```n")
 
-    if ($count -gt 10) {
-        $null = $sb.Append("(These are 10 of the failures)")
-        $count = 10
+    if ($count -gt 5) {
+        $null = $sb.Append("(These are 5 of the failures)`n`n")
+        $count = 5
     }
 
     for ($i = 0; $i -lt $count; $i++) {
-        $null = $sb.Append("### $($failures[$i].testcaseTitle)`n")
-        $null = $sb.Append("  Error: $($failures[$i].errorMessage)`n")
-        $null = $sb.Append("``````stacktrace`n")
+        $null = $sb.Append("$($failures[$i].testcaseTitle)`n")
+        $null = $sb.Append("``````powershell`n")
+        $null = $sb.Append("$($failures[$i].errorMessage)`n")
         $null = $sb.Append($failures[$i].stacktrace)
         $null = $sb.Append("`n```````n")
     }

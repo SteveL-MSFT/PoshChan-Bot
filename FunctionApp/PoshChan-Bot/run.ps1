@@ -234,6 +234,11 @@ switch ($githubEvent) {
             Write-Host "GitHub org: $githubOrganization, project: $githubProject"
 
             $committer = $request.body.commit.committer.login
+            if ($null -eq $committer) {
+                Write-Error "Committer not found in: $($request.body.commit | Out-String)"
+                break
+            }
+
             if (!(Test-User -User $committer -Settings $settings -Setting failures)) {
                 Write-Error "@$committer is not authorized for automatic test failures"
                 break

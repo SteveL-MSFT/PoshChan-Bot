@@ -33,7 +33,7 @@ Recommendation is to only allow maintainers and key contributors.
 * `Please get test failures`
 
   The word `test` is optional.
-  This will go out to the CI runs and retrieve (up to 10) test failures and post them as a comment in the Pull Request.
+  This will go out to the CI runs and retrieve (up to 5) test failures and post them as a comment in the Pull Request.
   This capability only works if the test results are published to AzDevOps as it does not do any
   log parsing of the CI run and solely relies on published test results.
 
