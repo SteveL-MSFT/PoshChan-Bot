@@ -67,6 +67,7 @@ The format for this file should be:
 ```json
 {
   "version": "0.1",
+  "show_gifs": false,
   "azdevops": {
     "organization": "yourOrganization",
     "project": "yourProject",
