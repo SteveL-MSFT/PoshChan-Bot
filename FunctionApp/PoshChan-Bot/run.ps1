@@ -236,6 +236,7 @@ switch ($githubEvent) {
     }
 
     "status" {
+        Write-Host ($Request.Body | Out-String)
         if ($Request.Body.state -eq "failure") {
             $githubOrganization, $githubProject = $Request.Body.name.Split("/")
             Write-Host "GitHub org: $githubOrganization, project: $githubProject"
