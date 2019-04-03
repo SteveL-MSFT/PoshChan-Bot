@@ -133,8 +133,11 @@ function Get-DevOpsTestFailuresMessage($User, $Organization, $Project, $BuildId,
     $build = Get-DevOpsBuild -Organization $Organization -Project $Project -BuildId $buildId
     $failures = Get-DevOpsTestFailures -Organization $Organization -Project $Project -BuildUri $build.uri
     $sb = [System.Text.StringBuilder]::new()
-    if ($null -eq $failures -and $postNoFailures) {
-        return "@$user, test results were not published for $($build.definition.name) at $($build.uri)"
+    if ($null -eq $failures) {
+        if ($postNoFailures) {
+            return "@$user, test results were not published for $($build.definition.name) at $($build.uri)"
+        }
+        return
     }
     $count = $failures.Count
     if ($count -eq 0 -and $postNoFailures) {
