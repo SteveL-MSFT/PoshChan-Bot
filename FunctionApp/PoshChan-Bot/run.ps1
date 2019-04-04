@@ -48,10 +48,10 @@ switch ($githubEvent) {
     "issue_comment" {
         $name = $Request.Query.Name
         if ($null -ne $name) {
-            $poshchanMention = "@$name "
+            $poshchanMention = "@$name ".ToLower()
         }
         else {
-            $poshchanMention = "@PoshChan "
+            $poshchanMention = "@PoshChan ".ToLower()
         }
 
         if ($null -ne $Request.Query.DebugTrace) {
@@ -59,7 +59,7 @@ switch ($githubEvent) {
         }
 
         $commentBody = $body.comment.body
-        if (!($commentBody.StartsWith($poshchanMention, $true, $null))) {
+        if (!($commentBody.Trim().ToLower().StartsWith($poshchanMention))) {
             Write-Trace "Skipping message not sent to @PoshChan"
             Send-Ok
             return
@@ -82,8 +82,8 @@ switch ($githubEvent) {
 
         $command = $commentBody.SubString($poshchanMention.Length)
 
-        if (-not $command.StartsWith("Please ", $true, $null)) {
-            Write-Verbose "Command was '$command'"
+        if (-not $command.Trim().ToLower().StartsWith("please")) {
+            Write-Host "Command was '$command'"
             if ($true -eq $settings.show_gifs) {
                 $message = "@$user,`n![all requests start with the magic word: Please](https://raw.githubusercontent.com/SteveL-MSFT/PoshChan-Bot/master/Assets/magicword.gif)."
             }
@@ -262,6 +262,11 @@ switch ($githubEvent) {
 
             $devOpsOrganization, $devOpsProject = Get-DevOpsOrgAndProject -Settings $settings -DefaultOrganization $githubOrganization -DefaultProject $githubProject
             $message = Get-DevOpsTestFailuresMessage -User $committer -Organization $devOpsOrganization -Project $devOpsProject -BuildId $buildId
+            if ($null -eq $message) {
+                Write-Host "No failures found"
+                break
+            }
+
             $build = Get-DevOpsBuild -Organization $devOpsOrganization -Project $devOpsProject -BuildId $buildId
             $prId = $build.triggerInfo."pr.number"
             Write-Host "Found GitHub PR: $prId"
