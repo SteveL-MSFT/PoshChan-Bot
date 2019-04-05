@@ -228,7 +228,7 @@ switch ($githubEvent) {
             }
 
             default {
-                $message = "@$user, I do not understand: $command"
+                $message = "@$user, I do not understand: $command`n" + (Get-PoshChanHelp -Settings $settings -User $user)
                 Push-GitHubComment -message $message
                 break
             }
