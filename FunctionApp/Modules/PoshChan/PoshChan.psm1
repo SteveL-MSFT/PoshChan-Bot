@@ -53,7 +53,7 @@ function Get-PoshChanHelp($settings, $user) {
 
     if (Test-User -User $user -Settings $settings -Setting reminders) {
         $null = $sb.Append("  - ``remind me in <value> <units>`` this will create a reminder that will be posted after the specified duration`n")
-        $null = $sb.Append("    \<value\> is a number, and \<units\> can be `minutes`, `hours`, or `days` (singular or plural)`n")
+        $null = $sb.Append("    \<value\> is a number, and \<units\> can be ``minutes``, ``hours``, or ``days`` (singular or plural)`n")
     }
 
     $sb.ToString()
