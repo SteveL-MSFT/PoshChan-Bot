@@ -39,7 +39,7 @@ function Test-User($user, $settings, $setting) {
 
 function Get-PoshChanHelp($settings, $user) {
     $sb = [System.Text.StringBuilder]::new()
-    $null = $sb.Append("Commands available in this repo for you:`n")
+    $null = $sb.Append("`nCommands available in this repo for you:`n")
     if (Test-User -User $user -Settings $settings -Setting azdevops) {
         $targets = [string]::Join(",",($settings.azdevops.build_targets.psobject.properties.name | ForEach-Object { "``$_``" }))
         $null = $sb.Append("  - ``retry <target>`` this will attempt to retry only the failed jobs for the target pipeline`n")
