@@ -39,21 +39,21 @@ function Test-User($user, $settings, $setting) {
 
 function Get-PoshChanHelp($settings, $user) {
     $sb = [System.Text.StringBuilder]::new()
-    $sb.Append("Commands available in this repo for you:`n")
-    if ($null -ne $settings.azdevops -and $null -ne $settings.azdevops.authorized_users -and $user -in $settings.azdevops.authorized_users) {
-        $targets = [string]::Join(",",$settings.azdevops.build_targets.psobject.properties.name)
-        $sb.Append("  - ``retry <target>`` this will attempt to retry only the failed jobs for the target pipeline`n")
-        $sb.Append("  - ``rebuild <target>`` this will perform a complete rebuild of the target pipeline, ``rerun`` can be used in place of ``rebuild```n")
-        $sb.Append("    Supported values for <target> which can be a comma separated list are: $targets`n")
+    $null = $sb.Append("Commands available in this repo for you:`n")
+    if (Test-User -User $user -Settings $settings -Setting azdevops) {
+        $targets = [string]::Join(",",($settings.azdevops.build_targets.psobject.properties.name | ForEach-Object { "``$_``" }))
+        $null = $sb.Append("  - ``retry <target>`` this will attempt to retry only the failed jobs for the target pipeline`n")
+        $null = $sb.Append("  - ``rebuild <target>`` this will perform a complete rebuild of the target pipeline, ``rerun`` can be used in place of ``rebuild```n")
+        $null = $sb.Append("    Supported values for \<target\> which can be a comma separated list are: $targets`n")
     }
 
-    if ($null -ne $settings.failures -and $null -ne $settings.failures.authorized_users -and $user -in $settings.failures.authorized_users) {
-        $sb.Append("  - ``get failures`` this will attempt to get the latest failures for all of the target pipelines`n")
+    if (Test-User -User $user -Settings $settings -Setting failures) {
+        $null = $sb.Append("  - ``get failures`` this will attempt to get the latest failures for all of the target pipelines`n")
     }
 
-    if ($null -ne $settings.reminders -and $null -ne $settings.reminders.authorized_users -and $user -in $settings.reminders.authorized_users) {
-        $sb.Append("  - ``remind me in <value> <units>`` this will create a reminder that will be posted after the specified duration`n")
-        $sb.Append("    <value> is a number, and <units> can be `minutes`, `hours`, or `days` (singular or plural)`n")
+    if (Test-User -User $user -Settings $settings -Setting reminders) {
+        $null = $sb.Append("  - ``remind me in <value> <units>`` this will create a reminder that will be posted after the specified duration`n")
+        $null = $sb.Append("    \<value\> is a number, and \<units\> can be `minutes`, `hours`, or `days` (singular or plural)`n")
     }
 
     $sb.ToString()

@@ -85,10 +85,11 @@ switch ($githubEvent) {
         if (-not $command.Trim().ToLower().StartsWith("please")) {
             Write-Host "Command was '$command'"
             if ($true -eq $settings.show_gifs) {
-                $message = "@$user,`n![all requests start with the magic word: Please](https://raw.githubusercontent.com/SteveL-MSFT/PoshChan-Bot/master/Assets/magicword.gif)."
+                $message = "@$user,`n![all requests start with the magic word: ``Please``](https://raw.githubusercontent.com/SteveL-MSFT/PoshChan-Bot/master/Assets/magicword.gif).`n" +
+                    (Get-PoshChanHelp -Settings $settings -User $user)
             }
             else {
-                $message = "@$user, all requests start with the magic word: Please"
+                $message = "@$user, all requests start with the magic word: ``Please```n" + (Get-PoshChanHelp -Settings $settings -User $user)
             }
 
             Push-GitHubComment -message $message
