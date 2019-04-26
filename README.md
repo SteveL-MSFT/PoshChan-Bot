@@ -2,6 +2,28 @@
 
 This Bot is designed for use with GitHub enabling requests of the Bot to perform some specific actions by authorized users.
 
+## Architecture
+
+```text
+[GitHub WebHook] --> [PoshChan-Bot AzF] --> [AzQueue: azdevops-rebuild] --> [AzDevOps-Rebuild AzF]
+                             |                                                        |
+                             V                                                        |
+                     [AzQueue: github-respond] <--------------------------------------+
+                             |
+                             V
+                     [GitHub-Respond AzF]
+```
+
+1. Request comes in as a GitHub web-hook HTTP request
+1. PoshChan-Bot function is instantiated and determines the type of command
+    1. If reminder, PoshChan-Bot puts a message in the `github-respond` queue that is hidden for the requested amount of time
+    1. if azdevops, PoshChan-Bot puts a message in the `azdevops-rebuild` queue
+1. Items in the `github-respond` queue triggers the `GitHub-Respond` function to post to a specific issue a comment
+1. Items in the `azdevops-rebuild` queue triggers the `AzDevOps-Rebuild` function
+    1. The `AzDevOps-Rebuild` function determines if the request is to rebuild or retry a pull request
+    1. A rebuild results in posting to queue a new build for existing pull request
+    1. A retry results in patching an existing build for retry
+
 ## Supported Commands
 
 All commands need to be directed to @PoshChan and only allowed by authorized users of a repository.
