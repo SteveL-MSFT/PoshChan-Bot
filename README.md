@@ -5,13 +5,13 @@ This Bot is designed for use with GitHub enabling requests of the Bot to perform
 ## Architecture
 
 ```text
-[GitHub WebHook] --> [PoshChan-Bot AzF] --> [AzQueue: azdevops-rebuild] --> [AzDevOps-Rebuild AzF]
-                             |                                                        |
-                             V                                                        |
-                     [AzQueue: github-respond] <--------------------------------------+
+🕸️GitHub WebHook🕸️ --> ⚡PoshChan-Bot AzF⚡ --> 💾AzQueue: azdevops-rebuild💾 --> ⚡AzDevOps-Rebuild AzF⚡
+                             |                                                          |
+                             V                                                          |
+                     💾AzQueue: github-respond💾 <--------------------------------------
                              |
                              V
-                     [GitHub-Respond AzF]
+                     ⚡GitHub-Respond AzF⚡
 ```
 
 1. Request comes in as a GitHub web-hook HTTP request
