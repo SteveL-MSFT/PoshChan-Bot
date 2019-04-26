@@ -5,17 +5,22 @@ This Bot is designed for use with GitHub enabling requests of the Bot to perform
 ## Architecture
 
 ```text
-[GitHub WebHook] -⚡-> <PoshChan-Bot AzF> -💾-> (AzQueue: azdevops-rebuild) -⚡-> <AzDevOps-Rebuild AzF> -⚡-> [AzDevOps]
-                             |                                                          |
-                            💾                                                         💾
-                             |                                                          |
-                             V                                                          |
-                     (AzQueue: github-respond) <----------------------------------------+
-                             |
-                             ⚡
-                             |
-                             V
-                     <GitHub-Respond AzF> -⚡-> [GitHub]
+[GitHub WebHook]
+        |
+        ⚡
+        |
+        V
+<AzF:PoshChan-Bot> -💾-> (AzQ: azdevops-rebuild) -⚡-> <AzF:AzDevOps-Rebuild> -⚡-> [AzDevOps]
+        |                                                        |
+       💾                                                       💾
+        |                                                        |
+        V                                                        |
+(AzQ: github-respond) <------------------------------------------+
+        |
+        ⚡
+        |
+        V
+<AzF:GitHub-Respond> -⚡-> [GitHub]
 ```
 
 1. Request comes in as a GitHub web-hook HTTP request
