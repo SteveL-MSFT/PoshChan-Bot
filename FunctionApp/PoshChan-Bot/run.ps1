@@ -22,7 +22,6 @@ function Push-GitHubComment($message, $url) {
     }
 
     Push-Queue -Queue github-respond -Object @{ url = $url; message = $message }
-    #Push-OutputBinding -Name githubrespond -Value @{ url = $url; message = $message }
 }
 
 function Send-Ok {
@@ -240,8 +239,6 @@ switch ($githubEvent) {
         Write-Trace ($Request.Body | Out-String)
         if ($Request.Body.state -eq "failure") {
             $githubOrganization, $githubProject = $Request.Body.name.Split("/")
-            Write-Host "GitHub org: $githubOrganization, project: $githubProject"
-
             $committer = $request.body.commit.committer.login
             if ($null -eq $committer) {
                 Write-Error "Committer not found in: $($request.body.commit | Out-String)"
@@ -249,7 +246,7 @@ switch ($githubEvent) {
             }
 
             if (!(Test-User -User $committer -Settings $settings -Setting failures)) {
-                Write-Error "@$committer is not authorized for automatic test failures"
+                # Committer is not authorized
                 break
             }
 
