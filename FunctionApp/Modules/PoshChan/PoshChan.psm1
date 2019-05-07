@@ -33,7 +33,7 @@ function Test-User($user, $settings, $setting) {
         return $true
     }
 
-    Write-Error "$user not found in $([string]::Join(',', $settings.$setting.authorized_users))"
+    Write-Error "User was not found in $([string]::Join(',', $settings.$setting.authorized_users))"
     $false
 }
 
