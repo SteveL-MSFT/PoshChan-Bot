@@ -32,7 +32,7 @@ foreach ($context in $item.context) {
         $contexts = ($statuses | Select-Object context -Unique).context
         $message = "did not find matching build context: ``$context``; allowed contexts: $([string]::Join(", ",$contexts))"
         Write-Error $message
-        Push-GitHubComment -message ("@$($item.user), " + $message)
+        Push-GitHubComment -message "@$($item.user), $message"
         return
     }
 
@@ -43,7 +43,7 @@ foreach ($context in $item.context) {
     if ($null -eq $buildId) {
         $message = "could not find ``buildId`` in '$($status.target_url)'"
         Write-Error $message
-        Push-GitHubComment -message ("@$($item.user), " + $message)
+        Push-GitHubComment -message "@$($item.user), $message"
         return
     }
 
