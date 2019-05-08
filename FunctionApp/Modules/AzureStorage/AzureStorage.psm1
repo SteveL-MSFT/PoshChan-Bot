@@ -57,5 +57,11 @@ function Push-AzureStorageQueue
     $queueMessage =[Convert]::ToBase64String($queueMessage)
     $body = "<QueueMessage><MessageText>$queueMessage</MessageText></QueueMessage>"
 
-    $null = Invoke-RestMethod -Uri "$storageUrl" -Headers $headers -Method Post -Body $body -SkipHeaderValidation
+    try {
+        $null = Invoke-RestMethod -Uri "$storageUrl" -Headers $headers -Method Post -Body $body -SkipHeaderValidation
+    }
+    catch {
+        $_ | Out-String | Write-Error
+        throw $_
+    }
 }

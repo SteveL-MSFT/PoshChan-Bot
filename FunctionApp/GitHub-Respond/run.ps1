@@ -1,6 +1,8 @@
 # Input bindings are passed in via param block.
 param([string] $QueueItem, $TriggerMetadata)
 
+Write-Host "GitHub-Respond QueueItem: $QueueItem"
+
 $item = $QueueItem | ConvertFrom-Json
 $url = $item.url
 $message = $item.message

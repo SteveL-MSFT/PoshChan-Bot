@@ -219,6 +219,8 @@ switch ($githubEvent) {
                     }
                 }
 
+                Write-Host "Reminder request for $time $units"
+
                 $message = "@$user, will remind you in $time $units"
                 Push-GitHubComment -message $message
 
