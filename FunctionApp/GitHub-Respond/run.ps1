@@ -1,11 +1,8 @@
 # Input bindings are passed in via param block.
-param([string] $QueueItem, $TriggerMetadata)
+param($QueueItem, $TriggerMetadata)
 
-Write-Host "GitHub-Respond QueueItem: $QueueItem"
-
-$item = $QueueItem | ConvertFrom-Json
-$url = $item.url
-$message = $item.message
+$url = $QueueItem.url
+$message = $QueueItem.message
 
 if ($null -eq $message) {
     Write-Error "Message is missing"
