@@ -1,9 +1,8 @@
 # Input bindings are passed in via param block.
-param([string] $QueueItem, $TriggerMetadata)
+param($QueueItem, $TriggerMetadata)
 
-$item = $QueueItem | ConvertFrom-Json
-$url = $item.url
-$message = $item.message
+$url = $QueueItem.url
+$message = $QueueItem.message
 
 if ($null -eq $message) {
     Write-Error "Message is missing"
