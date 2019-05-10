@@ -16,12 +16,18 @@ function Write-Trace($message) {
     }
 }
 
-function Push-GitHubComment($message, $url) {
+function Push-GitHubComment($message, $reaction, $url) {
     if ($null -eq $url) {
         $url = $body.issue.comments_url
     }
 
-    Push-Queue -Queue github-respond -Object @{ url = $url; message = $message }
+    if ($message) {
+        Push-Queue -Queue github-respond -Object @{ url = $url; message = $message }
+    }
+
+    if ($reaction) {
+        Push-Queue -Queue github-respond -Object @{ url = $body.comment.url; reaction = $reaction }
+    }
 }
 
 function Send-Ok {
@@ -59,7 +65,7 @@ switch ($githubEvent) {
 
         $commentBody = $body.comment.body
         if (!($commentBody.Trim().ToLower().StartsWith($poshchanMention))) {
-            Write-Trace "Skipping message not sent to @PoshChan"
+            Write-Trace "Skipping message not sent to $poshchanMention"
             Send-Ok
             return
         }
@@ -74,7 +80,6 @@ switch ($githubEvent) {
         $user = $body.comment.user.login
         $pr = $body.issue.pull_request.url
         if ($null -eq $pr) {
-            Write-Warning "Ignoring non-PR comment"
             Send-Ok
             return
         }
@@ -91,7 +96,7 @@ switch ($githubEvent) {
                 $message = "@$user, all requests start with the magic word: ``Please```n" + (Get-PoshChanHelp -Settings $settings -User $user)
             }
 
-            Push-GitHubComment -message $message
+            Push-GitHubComment -message $message -reaction "confused"
             Send-Ok
             return
         }
@@ -100,7 +105,7 @@ switch ($githubEvent) {
             "Please get (last )?(test )?failures" {
                 if (!(Test-User -User $user -Settings $settings -Setting failures)) {
                     $message = "@$user, you are not authorized to request test failures"
-                    Push-GitHubComment -message $message
+                    Push-GitHubComment -message $message -reaction "confused"
                     break
                 }
 
@@ -118,6 +123,8 @@ switch ($githubEvent) {
                         Write-Error "Could not extract buildId from '$($status.Body.target_url)'"
                         break
                     }
+
+                    Push-GitHubComment -reaction "+1"
 
                     $devOpsOrganization, $devOpsProject = Get-DevOpsOrgAndProject -Settings $settings -DefaultOrganization $organization -DefaultProject $project
                     $message = Get-DevOpsTestFailuresMessage -User $user -Organization $devOpsOrganization -Project $devOpsProject -BuildId $buildId -postNoFailures
@@ -147,7 +154,7 @@ switch ($githubEvent) {
                 if ($invalid) {
                     $supported = [string]::Join(", ", ($build_targets | ForEach-Object { "``$_``" }))
                     $message = "@$user, I do not understand the build target(s) ``$([string]::Join(", ",$invalid))``; I only allow $supported"
-                    Push-GitHubComment -message $message
+                    Push-GitHubComment -message $message -reaction "confused"
                     break
                 }
 
@@ -167,7 +174,7 @@ switch ($githubEvent) {
                 $context = $resolvedTargets | Select-Object -Unique
                 if ($null -eq $context) {
                     $message = "@$user, could not find a matching build target"
-                    Push-GitHubComment -message $message
+                    Push-GitHubComment -message $message -reaction "confused"
                     break
                 }
 
@@ -182,6 +189,7 @@ switch ($githubEvent) {
                 }
 
                 Write-Host "Queuing $action for '$([string]::Join(", ",$context))'"
+                Push-GitHubComment -reaction "+1"
                 Push-Queue -Queue azdevops-rebuild -Object $queueItem
                 break
             }
@@ -189,7 +197,7 @@ switch ($githubEvent) {
             "Please remind me in (?<time>\d+) (?<units>.+)" {
                 if (!(Test-User -User $user -Settings $settings -Setting reminders)) {
                     $message = "@$user, you are not authorized to request reminders"
-                    Push-GitHubComment -message $message
+                    Push-GitHubComment -message $message -reaction "confused"
                     break
                 }
 
@@ -214,16 +222,14 @@ switch ($githubEvent) {
 
                     default {
                         $message = "@$user, I do not understand '$units'; I only allow ``minutes``,``hours``, and ``days``"
-                        Push-GitHubComment -message $message
+                        Push-GitHubComment -message $message -reaction "confused"
                         break
                     }
                 }
 
                 Write-Host "Reminder request for $time $units"
 
-                $message = "@$user, will remind you in $time $units"
-                Push-GitHubComment -message $message
-
+                Push-GitHubComment -reaction "+1"
                 $message = "@$user, this is the reminder you requested $time $units ago"
                 Push-Queue -Queue github-respond -Object @{ url = $body.issue.comments_url; message = $message } -VisibilitySeconds $timeSeconds
                 break
@@ -231,7 +237,7 @@ switch ($githubEvent) {
 
             default {
                 $message = "@$user, I do not understand: $command`n" + (Get-PoshChanHelp -Settings $settings -User $user)
-                Push-GitHubComment -message $message
+                Push-GitHubComment -message $message -reaction "confused"
                 break
             }
         }

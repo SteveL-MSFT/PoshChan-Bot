@@ -35,3 +35,18 @@ function Send-GitHubComment($Url, $Body) {
         throw $_
     }
 }
+
+function Send-GitHubReaction($Url, $Reaction) {
+    $myHeaders = $headers
+    $myHeaders += @{ Accept = 'application/vnd.github.squirrel-girl-preview+json'} # needed for preview of Reactions API
+
+    $body = @{ content = $Reaction } | ConvertTo-Json
+
+    try {
+        $null = Invoke-RestMethod -Headers $myHeaders -Uri "$url/reactions" -Method Post -Body $body
+    }
+    catch {
+        $_ | Out-String | Write-Error
+        throw $_
+    }
+}
