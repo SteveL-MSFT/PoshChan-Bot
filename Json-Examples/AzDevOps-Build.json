@@ -1,0 +1,136 @@
+{
+    "_links": {
+      "self": {
+        "href": "https://dev.azure.com/powershell/xxx/_apis/build/Builds/23282"
+      },
+      "web": {
+        "href": "https://dev.azure.com/powershell/xxx/_build/results?buildId=23282"
+      },
+      "sourceVersionDisplayUri": {
+        "href": "https://dev.azure.com/powershell/xxx/_apis/build/builds/23282/sources"
+      },
+      "timeline": {
+        "href": "https://dev.azure.com/powershell/xxx/_apis/build/builds/23282/Timeline"
+      },
+      "badge": {
+        "href": "https://dev.azure.com/powershell/xxx/_apis/build/status/17"
+      }
+    },
+    "properties": {},
+    "tags": [],
+    "validationResults": [],
+    "plans": [
+      {
+        "planId": "xxx"
+      }
+    ],
+    "triggerInfo": {
+      "pr.sourceBranch": "break-action-preference",
+      "pr.sourceSha": "a5309ced2315644b4bb945029a440cf3de1b2fe7",
+      "pr.id": "229220887",
+      "pr.title": "Break action preference",
+      "pr.number": "8205",
+      "pr.isFork": "True",
+      "pr.sender.name": "KirkMunro",
+      "pr.sender.avatarUrl": "https://avatars3.githubusercontent.com/u/3515485?v=4",
+      "pr.sender.isExternal": "True",
+      "pr.autoCancel": "true"
+    },
+    "id": 23282,
+    "buildNumber": "PR-8205-20190516.01",
+    "status": "completed",
+    "result": "failed",
+    "queueTime": "2019-05-16T12:37:36.7682807Z",
+    "startTime": "2019-05-16T12:37:47.2984111Z",
+    "finishTime": "2019-05-16T12:56:42.9848427Z",
+    "url": "https://dev.azure.com/powershell/xxx/_apis/build/Builds/23282",
+    "definition": {
+      "drafts": [],
+      "id": 17,
+      "name": "PowerShell-CI-linux",
+      "url": "https://dev.azure.com/powershell/xxx/_apis/build/Definitions/17?revision=9",
+      "uri": "vstfs:///Build/Definition/17",
+      "path": "\\",
+      "type": "build",
+      "queueStatus": "enabled",
+      "revision": 9,
+      "project": {
+        "id": "xxx",
+        "name": "PowerShell",
+        "description": "Welcome to the PowerShell GitHub Community! PowerShell Core is a cross-platform (Windows, Linux, and macOS) automation and configuration tool/framework that works well with your existing tools and is optimized for dealing with structured data (e.g. JSON, CSV, XML, etc.), REST APIs, and object models. It includes a command-line shell, an associated scripting language and a framework for processing cmdlets.",
+        "url": "https://dev.azure.com/powershell/_apis/projects/xxx",
+        "state": "wellFormed",
+        "revision": 111,
+        "visibility": "public",
+        "lastUpdateTime": "2018-08-29T20:12:09.043Z"
+      }
+    },
+    "buildNumberRevision": 1,
+    "project": {
+      "id": "xxx",
+      "name": "PowerShell",
+      "description": "Welcome to the PowerShell GitHub Community! PowerShell Core is a cross-platform (Windows, Linux, and macOS) automation and configuration tool/framework that works well with your existing tools and is optimized for dealing with structured data (e.g. JSON, CSV, XML, etc.), REST APIs, and object models. It includes a command-line shell, an associated scripting language and a framework for processing cmdlets.",
+      "url": "https://dev.azure.com/powershell/_apis/projects/xxx",
+      "state": "wellFormed",
+      "revision": 111,
+      "visibility": "public",
+      "lastUpdateTime": "2018-08-29T20:12:09.043Z"
+    },
+    "uri": "vstfs:///Build/Build/23282",
+    "sourceBranch": "refs/pull/8205/merge",
+    "sourceVersion": "0221104826cbea5f1986a4144278686fc55c52ab",
+    "priority": "normal",
+    "reason": "pullRequest",
+    "requestedFor": {
+      "displayName": "Microsoft.VisualStudio.Services.TFS",
+      "url": "https://vssps.dev.azure.com/e/Microsoft/_apis/Identities/xxx",
+      "_links": {
+        "avatar": "@{href=https://dev.azure.com/powershell/_apis/GraphProfile/MemberAvatars/s2s.MDAwMDAwMDItMDAwMC04ODg4LTgwMDAtMDAwMDAwMDAwMDAwQDJjODk1OTA4LTA0ZTAtNDk1Mi04OWZkLTU0YjAwNDZkNjI4OA}"
+      },
+      "id": "xxx",
+      "uniqueName": null,
+      "imageUrl": null,
+      "descriptor": "s2s.MDAwMDAwMDItMDAwMC04ODg4LTgwMDAtMDAwMDAwMDAwMDAwQDJjODk1OTA4LTA0ZTAtNDk1Mi04OWZkLTU0YjAwNDZkNjI4OA"
+    },
+    "requestedBy": {
+      "displayName": "Microsoft.VisualStudio.Services.TFS",
+      "url": "https://vssps.dev.azure.com/e/Microsoft/_apis/Identities/xxx",
+      "_links": {
+        "avatar": "@{href=https://dev.azure.com/powershell/_apis/GraphProfile/MemberAvatars/s2s.MDAwMDAwMDItMDAwMC04ODg4LTgwMDAtMDAwMDAwMDAwMDAwQDJjODk1OTA4LTA0ZTAtNDk1Mi04OWZkLTU0YjAwNDZkNjI4OA}"
+      },
+      "id": "xxx",
+      "uniqueName": null,
+      "imageUrl": null,
+      "descriptor": "s2s.MDAwMDAwMDItMDAwMC04ODg4LTgwMDAtMDAwMDAwMDAwMDAwQDJjODk1OTA4LTA0ZTAtNDk1Mi04OWZkLTU0YjAwNDZkNjI4OA"
+    },
+    "lastChangedDate": "2019-05-16T12:56:43.123Z",
+    "lastChangedBy": {
+      "displayName": "Microsoft.VisualStudio.Services.TFS",
+      "url": "https://vssps.dev.azure.com/e/Microsoft/_apis/Identities/xxx",
+      "_links": {
+        "avatar": "@{href=https://dev.azure.com/powershell/_apis/GraphProfile/MemberAvatars/s2s.MDAwMDAwMDItMDAwMC04ODg4LTgwMDAtMDAwMDAwMDAwMDAwQDJjODk1OTA4LTA0ZTAtNDk1Mi04OWZkLTU0YjAwNDZkNjI4OA}"
+      },
+      "id": "xxx",
+      "uniqueName": null,
+      "imageUrl": null,
+      "descriptor": "s2s.MDAwMDAwMDItMDAwMC04ODg4LTgwMDAtMDAwMDAwMDAwMDAwQDJjODk1OTA4LTA0ZTAtNDk1Mi04OWZkLTU0YjAwNDZkNjI4OA"
+    },
+    "parameters": "{\"system.pullRequest.pullRequestId\":\"229220887\",\"system.pullRequest.pullRequestNumber\":\"8205\",\"system.pullRequest.mergedAt\":null,\"system.pullRequest.sourceBranch\":\"break-action-preference\",\"system.pullRequest.targetBranch\":\"master\",\"system.pullRequest.sourceRepositoryUri\":\"https://github.com/PowerShell/PowerShell.git\",\"system.pullRequest.sourceCommitId\":\"a5309ced2315644b4bb945029a440cf3de1b2fe7\"}",
+    "orchestrationPlan": {
+      "planId": "xxx"
+    },
+    "logs": {
+      "id": 0,
+      "type": "Container",
+      "url": "https://dev.azure.com/powershell/xxx/_apis/build/builds/23282/logs"
+    },
+    "repository": {
+      "id": "PowerShell/PowerShell",
+      "type": "GitHub",
+      "clean": null,
+      "checkoutSubmodules": false
+    },
+    "keepForever": false,
+    "retainedByRelease": false,
+    "triggeredByBuild": null
+  }
