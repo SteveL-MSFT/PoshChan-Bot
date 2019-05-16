@@ -1,0 +1,203 @@
+{
+    "count": 3,
+    "value": [
+        {
+            "id": 104284,
+            "project": {
+                "id": "2972bb5c-f20c-4a60-8bd9-00ffe9987edc",
+                "name": "PowerShell",
+                "url": "https://dev.azure.com/powershell/_apis/projects/PowerShell"
+            },
+            "startedDate": "2019-05-16T12:53:52.08Z",
+            "completedDate": "2019-05-16T12:53:52.123Z",
+            "durationInMs": 43.0,
+            "outcome": "Failed",
+            "revision": 1,
+            "state": "Completed",
+            "testCase": {
+                "name": "Tests for (error, warning, etc) action preference.ErrorAction = Suspend does not work on functions"
+            },
+            "testRun": {
+                "id": "1111724",
+                "name": "Pester No Sudo - CI",
+                "url": "https://dev.azure.com/powershell/PowerShell/_apis/test/Runs/1111724"
+            },
+            "lastUpdatedDate": "2019-05-16T12:55:58.52Z",
+            "priority": 0,
+            "computerName": "fv-az659",
+            "build": {
+                "id": "23282",
+                "name": "PR-8205-20190516.01",
+                "url": "https://dev.azure.com/powershell/_apis/build/Builds/23282"
+            },
+            "errorMessage": "Expected an exception, with FullyQualifiedErrorId 'ParameterBindingFailed,MyHelperFunction' to be thrown, but the FullyQualifiedErrorId was 'CannotConvertArgumentNoMessage,MyHelperFunction'. from /home/vsts/work/1/s/test/powershell/Language/Scripting/ActionPreference.Tests.ps1:86 char:45\n    +             { MyHelperFunction -ErrorAction Suspend } | Should -Throw ...\n    +                                             ~~~~~~~",
+            "createdDate": "2019-05-16T12:55:58.52Z",
+            "url": "https://dev.azure.com/powershell/PowerShell/_apis/test/Runs/1111724/Results/104284",
+            "failureType": "None",
+            "automatedTestType": "NUnit",
+            "testCaseTitle": "Tests for (error, warning, etc) action preference.ErrorAction = Suspend does not work on functions",
+            "stackTrace": "at <ScriptBlock>, /home/vsts/work/1/s/test/powershell/Language/Scripting/ActionPreference.Tests.ps1: line 86\n86:             { MyHelperFunction -ErrorAction Suspend } | Should -Throw -ErrorId \"ParameterBindingFailed,MyHelperFunction\"",
+            "customFields": [],
+            "failingSince": {
+                "date": "2019-05-16T12:53:52.123Z",
+                "build": {
+                    "id": 23282,
+                    "definitionId": 0,
+                    "number": "PR-8205-20190516.01",
+                    "buildSystem": "Azure DevOps Services"
+                }
+            },
+            "testCaseReferenceId": 123632,
+            "owner": {
+                "displayName": "Microsoft.VisualStudio.Services.TFS",
+                "id": null
+            },
+            "lastUpdatedBy": {
+                "displayName": "PowerShell Build Service (powershell)",
+                "url": "https://vssps.dev.azure.com/e/Microsoft/_apis/Identities/099c015d-9fb4-4624-8878-985b1bd98560",
+                "_links": {
+                    "avatar": {
+                        "href": "https://dev.azure.com/powershell/_apis/GraphProfile/MemberAvatars/svc.Yjk2MmVkNGYtNjY3MC00YTM3LWFkMjQtOGI5MzgxNTMwZTY3OkJ1aWxkOjI5NzJiYjVjLWYyMGMtNGE2MC04YmQ5LTAwZmZlOTk4N2VkYw"
+                    }
+                },
+                "id": "099c015d-9fb4-4624-8878-985b1bd98560",
+                "uniqueName": "Build\\2972bb5c-f20c-4a60-8bd9-00ffe9987edc",
+                "imageUrl": "https://dev.azure.com/powershell/_apis/GraphProfile/MemberAvatars/svc.Yjk2MmVkNGYtNjY3MC00YTM3LWFkMjQtOGI5MzgxNTMwZTY3OkJ1aWxkOjI5NzJiYjVjLWYyMGMtNGE2MC04YmQ5LTAwZmZlOTk4N2VkYw",
+                "descriptor": "svc.Yjk2MmVkNGYtNjY3MC00YTM3LWFkMjQtOGI5MzgxNTMwZTY3OkJ1aWxkOjI5NzJiYjVjLWYyMGMtNGE2MC04YmQ5LTAwZmZlOTk4N2VkYw"
+            },
+            "automatedTestName": "Tests for (error, warning, etc) action preference.ErrorAction = Suspend does not work on functions"
+        },
+        {
+            "id": 104285,
+            "project": {
+                "id": "2972bb5c-f20c-4a60-8bd9-00ffe9987edc",
+                "name": "PowerShell",
+                "url": "https://dev.azure.com/powershell/_apis/projects/PowerShell"
+            },
+            "startedDate": "2019-05-16T12:53:52.123Z",
+            "completedDate": "2019-05-16T12:53:52.163Z",
+            "durationInMs": 40.0,
+            "outcome": "Failed",
+            "revision": 1,
+            "state": "Completed",
+            "testCase": {
+                "name": "Tests for (error, warning, etc) action preference.ErrorAction = Suspend does not work on cmdlets"
+            },
+            "testRun": {
+                "id": "1111724",
+                "name": "Pester No Sudo - CI",
+                "url": "https://dev.azure.com/powershell/PowerShell/_apis/test/Runs/1111724"
+            },
+            "lastUpdatedDate": "2019-05-16T12:55:58.52Z",
+            "priority": 0,
+            "computerName": "fv-az659",
+            "build": {
+                "id": "23282",
+                "name": "PR-8205-20190516.01",
+                "url": "https://dev.azure.com/powershell/_apis/build/Builds/23282"
+            },
+            "errorMessage": "Expected an exception, with FullyQualifiedErrorId 'ParameterBindingFailed,Microsoft.PowerShell.Commands.GetProcessCommand' to be thrown, but the FullyQualifiedErrorId was 'CannotConvertArgumentNoMessage,Microsoft.PowerShell.Commands.GetProcessCommand'. from /home/vsts/work/1/s/test/powershell/Language/Scripting/ActionPreference.Tests.ps1:90 char:40\n    +             { Get-Process -ErrorAction Suspend } | Should -Throw -Err ...\n    +                                        ~~~~~~~",
+            "createdDate": "2019-05-16T12:55:58.52Z",
+            "url": "https://dev.azure.com/powershell/PowerShell/_apis/test/Runs/1111724/Results/104285",
+            "failureType": "None",
+            "automatedTestType": "NUnit",
+            "testCaseTitle": "Tests for (error, warning, etc) action preference.ErrorAction = Suspend does not work on cmdlets",
+            "stackTrace": "at <ScriptBlock>, /home/vsts/work/1/s/test/powershell/Language/Scripting/ActionPreference.Tests.ps1: line 90\n90:             { Get-Process -ErrorAction Suspend } | Should -Throw -ErrorId \"ParameterBindingFailed,Microsoft.PowerShell.Commands.GetProcessCommand\"",
+            "customFields": [],
+            "failingSince": {
+                "date": "2019-05-16T12:53:52.163Z",
+                "build": {
+                    "id": 23282,
+                    "definitionId": 0,
+                    "number": "PR-8205-20190516.01",
+                    "buildSystem": "Azure DevOps Services"
+                }
+            },
+            "testCaseReferenceId": 123631,
+            "owner": {
+                "displayName": "Microsoft.VisualStudio.Services.TFS",
+                "id": null
+            },
+            "lastUpdatedBy": {
+                "displayName": "PowerShell Build Service (powershell)",
+                "url": "https://vssps.dev.azure.com/e/Microsoft/_apis/Identities/099c015d-9fb4-4624-8878-985b1bd98560",
+                "_links": {
+                    "avatar": {
+                        "href": "https://dev.azure.com/powershell/_apis/GraphProfile/MemberAvatars/svc.Yjk2MmVkNGYtNjY3MC00YTM3LWFkMjQtOGI5MzgxNTMwZTY3OkJ1aWxkOjI5NzJiYjVjLWYyMGMtNGE2MC04YmQ5LTAwZmZlOTk4N2VkYw"
+                    }
+                },
+                "id": "099c015d-9fb4-4624-8878-985b1bd98560",
+                "uniqueName": "Build\\2972bb5c-f20c-4a60-8bd9-00ffe9987edc",
+                "imageUrl": "https://dev.azure.com/powershell/_apis/GraphProfile/MemberAvatars/svc.Yjk2MmVkNGYtNjY3MC00YTM3LWFkMjQtOGI5MzgxNTMwZTY3OkJ1aWxkOjI5NzJiYjVjLWYyMGMtNGE2MC04YmQ5LTAwZmZlOTk4N2VkYw",
+                "descriptor": "svc.Yjk2MmVkNGYtNjY3MC00YTM3LWFkMjQtOGI5MzgxNTMwZTY3OkJ1aWxkOjI5NzJiYjVjLWYyMGMtNGE2MC04YmQ5LTAwZmZlOTk4N2VkYw"
+            },
+            "automatedTestName": "Tests for (error, warning, etc) action preference.ErrorAction = Suspend does not work on cmdlets"
+        },
+        {
+            "id": 104286,
+            "project": {
+                "id": "2972bb5c-f20c-4a60-8bd9-00ffe9987edc",
+                "name": "PowerShell",
+                "url": "https://dev.azure.com/powershell/_apis/projects/PowerShell"
+            },
+            "startedDate": "2019-05-16T12:53:52.163Z",
+            "completedDate": "2019-05-16T12:53:52.18Z",
+            "durationInMs": 17.0,
+            "outcome": "Failed",
+            "revision": 1,
+            "state": "Completed",
+            "testCase": {
+                "name": "Tests for (error, warning, etc) action preference.WarningAction = Suspend does not work"
+            },
+            "testRun": {
+                "id": "1111724",
+                "name": "Pester No Sudo - CI",
+                "url": "https://dev.azure.com/powershell/PowerShell/_apis/test/Runs/1111724"
+            },
+            "lastUpdatedDate": "2019-05-16T12:55:58.52Z",
+            "priority": 0,
+            "computerName": "fv-az659",
+            "build": {
+                "id": "23282",
+                "name": "PR-8205-20190516.01",
+                "url": "https://dev.azure.com/powershell/_apis/build/Builds/23282"
+            },
+            "errorMessage": "Expected an exception, with FullyQualifiedErrorId 'ParameterBindingFailed,Microsoft.PowerShell.Commands.GetProcessCommand' to be thrown, but the FullyQualifiedErrorId was 'CannotConvertArgumentNoMessage,Microsoft.PowerShell.Commands.GetProcessCommand'. from /home/vsts/work/1/s/test/powershell/Language/Scripting/ActionPreference.Tests.ps1:94 char:42\n    +             { Get-Process -WarningAction Suspend } | Should -Throw -E ...\n    +                                          ~~~~~~~",
+            "createdDate": "2019-05-16T12:55:58.52Z",
+            "url": "https://dev.azure.com/powershell/PowerShell/_apis/test/Runs/1111724/Results/104286",
+            "failureType": "None",
+            "automatedTestType": "NUnit",
+            "testCaseTitle": "Tests for (error, warning, etc) action preference.WarningAction = Suspend does not work",
+            "stackTrace": "at <ScriptBlock>, /home/vsts/work/1/s/test/powershell/Language/Scripting/ActionPreference.Tests.ps1: line 94\n94:             { Get-Process -WarningAction Suspend } | Should -Throw -ErrorId \"ParameterBindingFailed,Microsoft.PowerShell.Commands.GetProcessCommand\"",
+            "customFields": [],
+            "failingSince": {
+                "date": "2019-05-16T12:53:52.18Z",
+                "build": {
+                    "id": 23282,
+                    "definitionId": 0,
+                    "number": "PR-8205-20190516.01",
+                    "buildSystem": "Azure DevOps Services"
+                }
+            },
+            "testCaseReferenceId": 123641,
+            "owner": {
+                "displayName": "Microsoft.VisualStudio.Services.TFS",
+                "id": null
+            },
+            "lastUpdatedBy": {
+                "displayName": "PowerShell Build Service (powershell)",
+                "url": "https://vssps.dev.azure.com/e/Microsoft/_apis/Identities/099c015d-9fb4-4624-8878-985b1bd98560",
+                "_links": {
+                    "avatar": {
+                        "href": "https://dev.azure.com/powershell/_apis/GraphProfile/MemberAvatars/svc.Yjk2MmVkNGYtNjY3MC00YTM3LWFkMjQtOGI5MzgxNTMwZTY3OkJ1aWxkOjI5NzJiYjVjLWYyMGMtNGE2MC04YmQ5LTAwZmZlOTk4N2VkYw"
+                    }
+                },
+                "id": "099c015d-9fb4-4624-8878-985b1bd98560",
+                "uniqueName": "Build\\2972bb5c-f20c-4a60-8bd9-00ffe9987edc",
+                "imageUrl": "https://dev.azure.com/powershell/_apis/GraphProfile/MemberAvatars/svc.Yjk2MmVkNGYtNjY3MC00YTM3LWFkMjQtOGI5MzgxNTMwZTY3OkJ1aWxkOjI5NzJiYjVjLWYyMGMtNGE2MC04YmQ5LTAwZmZlOTk4N2VkYw",
+                "descriptor": "svc.Yjk2MmVkNGYtNjY3MC00YTM3LWFkMjQtOGI5MzgxNTMwZTY3OkJ1aWxkOjI5NzJiYjVjLWYyMGMtNGE2MC04YmQ5LTAwZmZlOTk4N2VkYw"
+            },
+            "automatedTestName": "Tests for (error, warning, etc) action preference.WarningAction = Suspend does not work"
+        }
+    ]
+}
