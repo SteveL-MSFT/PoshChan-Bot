@@ -6,15 +6,26 @@ $message = $QueueItem.message
 $reaction = $QueueItem.reaction
 
 if ($message) {
-    Write-Host "Posting message:`n$message"
+    $filePath = $QueueItem.path
+
+    if ($filePath) {
+        $msgForm = "PR Review"
+        $payload = @{
+            body = ""
+            event = "COMMENT"
+            comments = ,@{ path = $filePath; position = 1; body = $message }
+        }
+    } else {
+        $msgForm = "PR Comment"
+        $payload = @{ body = $message }
+    }
+
+    Write-Host "Posting message as '$msgForm':`n$message"
     Write-Host "To URL: $url"
 
-    $json = @{
-        body = $message
-    } | ConvertTo-Json -Compress
-
     try {
-        Send-GitHubComment -Url $url -Body $json
+        $json = $payload | ConvertTo-Json -Compress
+        Send-GitHubCommentOrReview -Url $url -Body $json
     } catch {
         $_ | Out-String | Write-Error
     }

@@ -30,6 +30,20 @@ function Push-GitHubComment($message, $reaction, $url) {
     }
 }
 
+function Push-GitHubReview($message, $url, $filePath) {
+    Push-Queue -Queue github-respond -Object @{ url = $url; message = $message; path = $filePath }
+}
+
+function Get-FirstPullRequestFile($diff) {
+    ## Get the first line which starts with 'diff --git'.
+    $firstLine = $diff.SubString(0, $diff.IndexOf("`n"))
+
+    ## Get the relative path to the first file.
+    ## An example diff string is 'diff --git a/src/a.cs b/src/a.cs'.
+    $firstFile = $firstLine.Split(" ")[-1].SubString(2)
+    return $firstFile
+}
+
 function Send-Ok {
     Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
@@ -112,6 +126,10 @@ switch ($githubEvent) {
                 $githubPr = Get-GitHubPullRequest -PullRequestUrl $pr
                 Write-Host "Using statuses url: $($githubPr.statuses_url)"
 
+                $prReviewUrl = "{0}/reviews" -f $pr
+                $prDiff = Get-GitHubPullRequestDiff -PullRequestDiffUrl $body.issue.pull_request.diff_url
+                $filePath = Get-FirstPullRequestFile -diff $prDiff
+
                 $statuses = Get-GitHubPullRequestStatuses -PullRequestStatusesUrl $githubPr.statuses_url -Organization $organization
                 Write-Host "Got '$($statuses.count)' statuses returned"
 
@@ -129,7 +147,7 @@ switch ($githubEvent) {
                     $devOpsOrganization, $devOpsProject = Get-DevOpsOrgAndProject -Settings $settings -DefaultOrganization $organization -DefaultProject $project
                     $message = Get-DevOpsTestFailuresMessage -User $user -Organization $devOpsOrganization -Project $devOpsProject -BuildId $buildId -postNoFailures
                     if ($message) {
-                        Push-GitHubComment -message $message -url $githubPr.comments_url
+                        Push-GitHubReview -message $message -url $prReviewUrl -filePath $filePath
                     }
                 }
             }
@@ -276,10 +294,15 @@ switch ($githubEvent) {
             $build = Get-DevOpsBuild -Organization $devOpsOrganization -Project $devOpsProject -BuildId $buildId
             $prId = $build.triggerInfo."pr.number"
             Write-Host "Found GitHub PR: $prId"
-            $prUrl = "https://api.github.com/repos/$githubOrganization/$githubProject/issues/$prId"
+            $prUrl = "https://api.github.com/repos/$githubOrganization/$githubProject/pulls/$prId"
             Write-Host "Getting GitHub PR from: $prUrl"
             $githubPr = Get-GitHubPullRequest -PullRequestUrl $prUrl
-            Push-GitHubComment -message $message -url $githubPr.comments_url
+
+            $prReviewUrl = "{0}/reviews" -f $prUrl
+            $prDiff = Get-GitHubPullRequestDiff -PullRequestDiffUrl $githubPr.diff_url
+            $filePath = Get-FirstPullRequestFile -diff $prDiff
+
+            Push-GitHubReview -message $message -url $prReviewUrl -filePath $filePath
             break
         }
     }
