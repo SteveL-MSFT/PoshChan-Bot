@@ -12,6 +12,16 @@ function Get-GitHubPullRequest($PullRequestUrl) {
     }
 }
 
+function Get-GitHubPullRequestDiff($PullRequestDiffUrl) {
+    try {
+        Invoke-RestMethod -Uri $PullRequestDiffUrl -Headers $headers
+    }
+    catch {
+        $_ | Out-String | Write-Error
+        throw $_
+    }
+}
+
 function Get-GitHubPullRequestStatuses($PullRequestStatusesUrl, $Organization) {
     try {
         $statuses = Invoke-RestMethod -Uri $PullRequestStatusesUrl -Headers $headers
@@ -26,7 +36,7 @@ function Get-GitHubPullRequestStatuses($PullRequestStatusesUrl, $Organization) {
     }
 }
 
-function Send-GitHubComment($Url, $Body) {
+function Send-GitHubCommentOrReview($Url, $Body) {
     try {
         $null = Invoke-RestMethod -Headers $headers -Uri $url -Method Post -Body $Body
     }
