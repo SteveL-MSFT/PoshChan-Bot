@@ -150,18 +150,19 @@ function Get-DevOpsTestFailuresMessage($User, $Organization, $Project, $BuildId,
     }
     $null = $sb.Append("failures in ``$($build.definition.name)```n")
 
-    if ($count -gt 5) {
-        $null = $sb.Append("(These are 5 of the failures)`n`n")
-        $count = 5
-    }
+    $null = $sb.Append("<details><summary>Failure Details</summary>")
 
     for ($i = 0; $i -lt $count; $i++) {
+        $null = $sb.Append("<details><summary>")
         $null = $sb.Append("$($failures[$i].testcaseTitle)`n")
+        $null = $sb.Append("</summary>")
         $null = $sb.Append("``````powershell`n")
         $null = $sb.Append("$($failures[$i].errorMessage)`n")
         $null = $sb.Append($failures[$i].stacktrace)
         $null = $sb.Append("`n```````n")
+        $null = $sb.Append("</details>")
     }
 
+    $null = $sb.Append("</details>")
     $sb.Replace("`n","`r`n").ToString()
 }
