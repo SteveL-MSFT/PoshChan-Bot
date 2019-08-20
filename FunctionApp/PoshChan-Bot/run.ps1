@@ -152,7 +152,7 @@ switch ($githubEvent) {
                 }
             }
 
-            "Please (?<action>rebuild|rerun|retry) (?<target>.+)" {
+            "Please (?<action>rebuild|rerun|retry|restart) (?<target>.+)" {
                 if (!(Test-User -User $user -Settings $settings -Setting azdevops)) {
                     $message = "@$user, you are not authorized to request a rebuild"
                     Push-GitHubComment -message $message
@@ -163,6 +163,11 @@ switch ($githubEvent) {
                 # rerun == rebuild
                 if ($action -eq "rerun") {
                     $action = "rebuild"
+                }
+
+                # restart == retry
+                if ($action -eq "restart") {
+                    $action = "retry"
                 }
 
                 $targets = $matches.target.Split(",").Trim()

@@ -42,7 +42,7 @@ function Get-PoshChanHelp($settings, $user) {
     $null = $sb.Append("`nCommands available in this repo for you:`n")
     if (Test-User -User $user -Settings $settings -Setting azdevops) {
         $targets = [string]::Join(",",($settings.azdevops.build_targets.psobject.properties.name | ForEach-Object { "``$_``" }))
-        $null = $sb.Append("  - ``retry <target>`` this will attempt to retry only the failed jobs for the target pipeline`n")
+        $null = $sb.Append("  - ``retry <target>`` this will attempt to retry only the failed jobs for the target pipeline, ``restart`` can be used in place of ``retry```n")
         $null = $sb.Append("  - ``rebuild <target>`` this will perform a complete rebuild of the target pipeline, ``rerun`` can be used in place of ``rebuild```n")
         $null = $sb.Append("    Supported values for \<target\> which can be a comma separated list are: $targets`n")
     }
