@@ -56,7 +56,8 @@ function Get-PoshChanHelp($settings, $user) {
         Add-LineItem -stringBuilder $sb -Message "``remind me in &lt;value&gt; &lt;units&gt;`` this will create a reminder that will be posted after the specified duration &lt;value&gt; is a number, and &lt;units&gt; can be ``minutes``, ``hours``, or ``days`` (singular or plural)"
     }
 
-    $null = $sb.Append("`n</ul>`n</details>")
+    # blank line is required before any additional markdown
+    $null = $sb.Append("`n</ul>`n</details>`n`n")
 
     $sb.ToString()
 }
