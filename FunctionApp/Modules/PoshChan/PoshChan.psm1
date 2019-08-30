@@ -61,6 +61,7 @@ function Get-PoshChanHelp($settings, $user) {
     $sb.ToString()
 }
 
+# Add a <li> element to a stringBuilder
 function Add-LineItem($message,[System.Text.StringBuilder]$stringBuilder)
 {
     $null = $stringBuilder.Append("<li>`n")
@@ -70,6 +71,7 @@ function Add-LineItem($message,[System.Text.StringBuilder]$stringBuilder)
     $null = $stringBuilder.Append("</li>`n")
 }
 
+# Convert VERY simple markdown with codeblocks to HTML
 function Convert-CodeMarkdownToHTML
 {
     param(
@@ -103,11 +105,11 @@ function Convert-CodeMarkdownToHTML
             {
                 1 {
                     $null=$sb.Append('<code>')
-                    $null=$sb.Append($markdownParts[$part].replace('<','&lt;').replace('>','&gt;'))
+                    $null=$sb.Append($markdownParts[$part])
                 }
                 0 {
                     $null=$sb.Append('</code>')
-                    $null=$sb.Append($markdownParts[$part].replace('\<','&lt;').replace('\>','&gt;'))
+                    $null=$sb.Append($markdownParts[$part])
                 }
             }
         }
