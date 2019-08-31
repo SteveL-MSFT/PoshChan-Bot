@@ -79,14 +79,14 @@ function Convert-CodeMarkdownToHTML
         $markdown
     )
 
-    if($markdown -notmatch '`')
+    if ($markdown -notmatch '`')
     {
         return $markdown
     }
 
     $markdownParts = $markdown -split '`'
 
-    if($markdownParts.Count % 2 -ne 1)
+    if ($markdownParts.Count % 2 -ne 1)
     {
         throw 'Invalid formed markdown'
     }
@@ -94,11 +94,11 @@ function Convert-CodeMarkdownToHTML
     $sb = [System.Text.StringBuilder]::new()
 
     $max = ($markdownParts.Count -1)
-    0..($markdownParts.Count -1)| ForEach-Object {
+    0..($markdownParts.Count -1) | ForEach-Object {
         $part = $_
-        if($part -eq 0)
+        if ($part -eq 0)
         {
-            $null=$sb.Append($markdownParts[$part])
+            $null = $sb.Append($markdownParts[$part])
         }
         else
         {
@@ -106,11 +106,11 @@ function Convert-CodeMarkdownToHTML
             {
                 1 {
                     $null=$sb.Append('<code>')
-                    $null=$sb.Append($markdownParts[$part])
+                    $null = $sb.Append($markdownParts[$part])
                 }
                 0 {
-                    $null=$sb.Append('</code>')
-                    $null=$sb.Append($markdownParts[$part])
+                    $null = $sb.Append('</code>')
+                    $null = $sb.Append($markdownParts[$part])
                 }
             }
         }
