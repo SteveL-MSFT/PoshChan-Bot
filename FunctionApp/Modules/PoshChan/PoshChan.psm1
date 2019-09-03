@@ -102,10 +102,10 @@ function Convert-CodeMarkdownToHTML
         }
         else
         {
-            switch($_ % 2)
+            switch ($_ % 2)
             {
                 1 {
-                    $null=$sb.Append('<code>')
+                    $null = $sb.Append('<code>')
                     $null = $sb.Append($markdownParts[$part])
                 }
                 0 {
