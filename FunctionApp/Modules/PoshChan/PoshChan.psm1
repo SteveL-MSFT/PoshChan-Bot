@@ -39,22 +39,81 @@ function Test-User($user, $settings, $setting) {
 
 function Get-PoshChanHelp($settings, $user) {
     $sb = [System.Text.StringBuilder]::new()
-    $null = $sb.Append("`nCommands available in this repo for you:`n")
+    $null = $sb.Append("`n<details>`n<summary>")
+    $null = $sb.Append("Commands available in this repo for you:")
+    $null = $sb.Append("`n</summary>`n<ul>")
     if (Test-User -User $user -Settings $settings -Setting azdevops) {
         $targets = [string]::Join(",",($settings.azdevops.build_targets.psobject.properties.name | ForEach-Object { "``$_``" }))
-        $null = $sb.Append("  - ``retry <target>`` this will attempt to retry only the failed jobs for the target pipeline, ``restart`` can be used in place of ``retry```n")
-        $null = $sb.Append("  - ``rebuild <target>`` this will perform a complete rebuild of the target pipeline, ``rerun`` can be used in place of ``rebuild```n")
-        $null = $sb.Append("    Supported values for \<target\> which can be a comma separated list are: $targets`n")
+        Add-LineItem -stringBuilder $sb -Message '`retry &lt;target&gt;` this will attempt to retry only the failed jobs for the target pipeline, `restart` can be used in place of `retry`'
+        Add-LineItem -stringBuilder $sb -Message "``rebuild &lt;target&gt;`` this will perform a complete rebuild of the target pipeline, ``rerun`` can be used in place of ``rebuild`` Supported values for &lt;target&gt; which can be a comma separated list are: $targets"
     }
 
     if (Test-User -User $user -Settings $settings -Setting failures) {
-        $null = $sb.Append("  - ``get failures`` this will attempt to get the latest failures for all of the target pipelines`n")
+        Add-LineItem -stringBuilder $sb -Message "``get failures`` this will attempt to get the latest failures for all of the target pipelines"
     }
 
     if (Test-User -User $user -Settings $settings -Setting reminders) {
-        $null = $sb.Append("  - ``remind me in <value> <units>`` this will create a reminder that will be posted after the specified duration`n")
-        $null = $sb.Append("    \<value\> is a number, and \<units\> can be ``minutes``, ``hours``, or ``days`` (singular or plural)`n")
+        Add-LineItem -stringBuilder $sb -Message "``remind me in &lt;value&gt; &lt;units&gt;`` this will create a reminder that will be posted after the specified duration &lt;value&gt; is a number, and &lt;units&gt; can be ``minutes``, ``hours``, or ``days`` (singular or plural)"
     }
 
+    # blank line is required before any additional markdown
+    $null = $sb.Append("`n</ul>`n</details>`n`n")
+
     $sb.ToString()
+}
+
+# Add a <li> element to a stringBuilder
+function Add-LineItem($message,[System.Text.StringBuilder]$stringBuilder)
+{
+    $null = $stringBuilder.Append("<li>`n")
+    $htmlMessage = Convert-CodeMarkdownToHTML -markdown $message
+    $null = $stringBuilder.Append($htmlMessage)
+    $null = $stringBuilder.Append("`n")
+    $null = $stringBuilder.Append("</li>`n")
+}
+
+# Convert VERY simple markdown with codeblocks to HTML
+function Convert-CodeMarkdownToHTML
+{
+    param(
+        $markdown
+    )
+
+    if ($markdown -notmatch '`')
+    {
+        return $markdown
+    }
+
+    $markdownParts = $markdown -split '`'
+
+    if ($markdownParts.Count % 2 -ne 1)
+    {
+        throw 'Invalid formed markdown'
+    }
+
+    $sb = [System.Text.StringBuilder]::new()
+
+    $max = ($markdownParts.Count -1)
+    0..($markdownParts.Count -1) | ForEach-Object {
+        $part = $_
+        if ($part -eq 0)
+        {
+            $null = $sb.Append($markdownParts[$part])
+        }
+        else
+        {
+            switch ($_ % 2)
+            {
+                1 {
+                    $null = $sb.Append('<code>')
+                    $null = $sb.Append($markdownParts[$part])
+                }
+                0 {
+                    $null = $sb.Append('</code>')
+                    $null = $sb.Append($markdownParts[$part])
+                }
+            }
+        }
+    }
+    return $sb.ToString()
 }
