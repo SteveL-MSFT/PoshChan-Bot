@@ -100,23 +100,8 @@ switch ($githubEvent) {
 
         $command = $commentBody.SubString($poshchanMention.Length)
 
-        if (-not $command.Trim().ToLower().StartsWith("please")) {
-            Write-Host "Command was '$command'"
-            if ($true -eq $settings.show_gifs) {
-                $message = "@$user,`n![all requests start with the magic word: ``Please``](https://raw.githubusercontent.com/SteveL-MSFT/PoshChan-Bot/master/Assets/magicword.gif).`n" +
-                    (Get-PoshChanHelp -Settings $settings -User $user)
-            }
-            else {
-                $message = "@$user, all requests start with the magic word: ``Please```n" + (Get-PoshChanHelp -Settings $settings -User $user)
-            }
-
-            Push-GitHubComment -message $message -reaction "confused"
-            Send-Ok
-            return
-        }
-
         switch -regex ($command.TrimEnd()) {
-            "Please get (last )?(test )?failures" {
+            "Get (last )?(test )?failures" {
                 if (!(Test-User -User $user -Settings $settings -Setting failures)) {
                     $message = "@$user, you are not authorized to request test failures"
                     Push-GitHubComment -message $message -reaction "confused"
@@ -152,7 +137,7 @@ switch ($githubEvent) {
                 }
             }
 
-            "Please (?<action>rebuild|rerun|retry|restart) (?<target>.+)" {
+            "(?<action>rebuild|rerun|retry|restart) (?<target>.+)" {
                 if (!(Test-User -User $user -Settings $settings -Setting azdevops)) {
                     $message = "@$user, you are not authorized to request a rebuild"
                     Push-GitHubComment -message $message
@@ -217,7 +202,7 @@ switch ($githubEvent) {
                 break
             }
 
-            "Please remind me in (?<time>\d+) (?<units>.+)" {
+            "Remind me in (?<time>\d+) (?<units>.+)" {
                 if (!(Test-User -User $user -Settings $settings -Setting reminders)) {
                     $message = "@$user, you are not authorized to request reminders"
                     Push-GitHubComment -message $message -reaction "confused"
