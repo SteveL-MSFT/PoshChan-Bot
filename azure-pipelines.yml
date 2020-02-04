@@ -9,5 +9,5 @@ steps:
       Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
       Install-Module PSScriptAnalyzer -Scope CurrentUser
       $suppress = 'PSAvoidUsingConvertToSecureStringWithPlainText', 'PSAvoidUsingWriteHost'
-      Invoke-ScriptAnalyzer -Path . -ExcludeRule $suppress -EnableExit
+      Invoke-ScriptAnalyzer -Path . -Recurse -ExcludeRule $suppress -EnableExit
   displayName: PSScriptAnalyzer
