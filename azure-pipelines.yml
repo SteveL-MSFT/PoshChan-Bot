@@ -6,11 +6,8 @@ pool:
 
 steps:
 - powershell: |
-      Install-Module PSScriptAnalyzer -Scope CurrentUser -Force
-      $suppress = "PSAvoidUsingConvertToSecureStringWithPlainText", "PSAvoidUsingWriteHost"
-      $results = Get-ChildItem -Recurse -Include *.ps1 | % { Invoke-ScriptAnalyzer -Path $_ -ExcludeRule $suppress } | Select-Object RuleName, Severity, ScriptPath, Line, Message
-      if ($null -ne $results) {
-        $results
-        throw "$($results.count) PSScriptAnalyzer error(s)!"
-      }
+      Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+      Install-Module PSScriptAnalyzer -Scope CurrentUser
+      $suppress = 'PSAvoidUsingConvertToSecureStringWithPlainText', 'PSAvoidUsingWriteHost'
+      Invoke-ScriptAnalyzer -Path . -ExcludeRule $suppress -EnableExit
   displayName: PSScriptAnalyzer
