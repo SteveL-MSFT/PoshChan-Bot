@@ -38,7 +38,7 @@ This Bot is designed for use with GitHub enabling requests of the Bot to perform
 All commands need to be directed to @PoshChan and only allowed by authorized users of a repository.
 Recommendation is to only allow maintainers and key contributors.
 
-* `Please retry <target>`
+* `Retry <target>`
 
   `<target>` can be `windows`,`linux`,`macos`,`static-analysis` or a comma separated list of any combination.
   You can also specify `all` if you want everything rebuilt.
@@ -46,7 +46,7 @@ Recommendation is to only allow maintainers and key contributors.
   A retry differs from a rebuild in that it retries the failed tasks in a pipeline rather than re-executing
   the pipeline entirely.
 
-* `Please <rebuild|rerun> <target>`
+* `<rebuild|rerun> <target>`
 
   The verb can be `rebuild` or `rerun`.
   `<target>` can be `windows`,`linux`,`macos`,`static-analysis` or a comma separated list of any combination.
@@ -55,13 +55,13 @@ Recommendation is to only allow maintainers and key contributors.
   A rebuild differs from a retry in that the pipeline is re-executed entirely even if some tasks succeeded.
   Recommendation is to use retry first.
 
-* `Please remind me in <time> <units>`
+* `Remind me in <time> <units>`
 
   `<time>` is an integer and `<units>` can be `minutes`, `hours`, or `days`.
   This will cause PoshChan to simply respond mentioning you after the duration specified.
   You can use this as a way to re-trigger a GitHub notification on a Pull Request you want to check on later because the tests haven't finished running.
 
-* `Please get test failures`
+* `Get test failures`
 
   The word `test` is optional.
   This will go out to the CI runs and retrieve (up to 5) test failures and post them as a comment in the Pull Request.
@@ -98,7 +98,6 @@ The format for this file should be:
 ```json
 {
   "version": "0.1",
-  "show_gifs": false,
   "azdevops": {
     "organization": "yourOrganization",
     "project": "yourProject",
