@@ -60,10 +60,6 @@ function Invoke-DevOpsRetry($Organization, $Project, $BuildId) {
 function Get-DevOpsTestFailures($Organization, $Project, $BuildUri) {
     if ($null -ne $env:BUILD_BUILDURI) {
         $buildUri = $env:BUILD_BUILDURI
-        $buildId = $env:BUILD_BUILDID
-    }
-    else {
-        $buildId = Split-Path $buildUri -Leaf
     }
 
     $params = @{

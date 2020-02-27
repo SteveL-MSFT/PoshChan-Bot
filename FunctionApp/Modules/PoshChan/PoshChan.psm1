@@ -93,7 +93,6 @@ function Convert-CodeMarkdownToHTML
 
     $sb = [System.Text.StringBuilder]::new()
 
-    $max = ($markdownParts.Count -1)
     0..($markdownParts.Count -1) | ForEach-Object {
         $part = $_
         if ($part -eq 0)
