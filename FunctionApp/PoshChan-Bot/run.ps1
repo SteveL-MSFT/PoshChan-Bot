@@ -47,6 +47,7 @@ function Get-FirstPullRequestFile($diff) {
 function Send-Ok {
     Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
+        Body = ''
     })
 }
 
